@@ -1,43 +1,43 @@
 PRODUCT_PACKAGES := \
     libfwdlockengine \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     OpenWnn \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libWnnEngDic \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libWnnJpnDic \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libwnndict \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     WAPPushManager
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Galaxy4 \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     HoloSpiralWallpaper \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     LiveWallpapers \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     LiveWallpapersPicker \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     MagicSmokeWallpapers \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     NoiseField \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     PhaseBeam \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     PhotoTable
 
 # Additional settings used in all AOSP builds
@@ -274,12 +274,12 @@ PRODUCT_COPY_FILES += \
 # skip this
 # Get the TTS language packs
 # external/svox/pico/lang/all_pico_languages.mk
-$(call inherit-product, external/svox/pico/lang/PicoLangDeDeInSystem.mk)
-$(call inherit-product, external/svox/pico/lang/PicoLangEnGBInSystem.mk)
-$(call inherit-product, external/svox/pico/lang/PicoLangEnUsInSystem.mk)
-$(call inherit-product, external/svox/pico/lang/PicoLangEsEsInSystem.mk)
-$(call inherit-product, external/svox/pico/lang/PicoLangFrFrInSystem.mk)
-$(call inherit-product, external/svox/pico/lang/PicoLangItItInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangDeDeInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangEnGBInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangEnUsInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangEsEsInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangFrFrInSystem.mk)
+# $(call inherit-product, external/svox/pico/lang/PicoLangItItInSystem.mk)
 
 # Get a list of languages.
 # $(call inherit-product, $(SRC_TARGET_DIR)/product/locales_full.mk)
@@ -294,34 +294,34 @@ PRODUCT_LOCALES := en_US en_AU en_IN fr_FR it_IT es_ES et_EE de_DE nl_NL cs_CZ p
 PRODUCT_PACKAGES += \
     Bluetooth \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     BluetoothMidiService \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Camera2 \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Gallery2 \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Music \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     MusicFX \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     OneTimeInitializer \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Provision \
 
 PRODUCT_PACKAGES += \
     SystemUI \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     EasterEgg \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     WallpaperCropper
 
 PRODUCT_PACKAGES += \
@@ -333,25 +333,25 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     pppd \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     screenrecord
 
 PRODUCT_PACKAGES += \
     librs_jni \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libvideoeditor_jni \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libvideoeditor_core \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libvideoeditor_osal \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libvideoeditor_videofilters \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     libvideoeditorplayer \
 
 PRODUCT_PACKAGES += \
@@ -363,7 +363,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     local_time.default \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     vibrator.default \
 
 PRODUCT_PACKAGES += \
@@ -778,43 +778,115 @@ $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
 # no entry
 
 # $(call inherit-product, $(SRC_TARGET_DIR)/product/core.mk)
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     BasicDreams \
+
+# PRODUCT_PACKAGES += \
     BlockedNumberProvider \
+
+# PRODUCT_PACKAGES += \
     BookmarkProvider \
+
+# PRODUCT_PACKAGES += \
     Browser2 \
+
+# PRODUCT_PACKAGES += \
     Calendar \
+
+# PRODUCT_PACKAGES += \
     CalendarProvider \
+
+# PRODUCT_PACKAGES += \
     CaptivePortalLogin \
+
+PRODUCT_PACKAGES += \
     CertInstaller \
+
+# PRODUCT_PACKAGES += \
     Contacts \
+
+# PRODUCT_PACKAGES += \
     DeskClock \
+
+# PRODUCT_PACKAGES += \
     DocumentsUI \
+
+# PRODUCT_PACKAGES += \
     DownloadProviderUi \
+
+# PRODUCT_PACKAGES += \
     Email \
+
+# PRODUCT_PACKAGES += \
     ExactCalculator \
+
+PRODUCT_PACKAGES += \
     ExternalStorageProvider \
+
+PRODUCT_PACKAGES += \
     FusedLocation \
+
+PRODUCT_PACKAGES += \
     InputDevices \
+
+# PRODUCT_PACKAGES += \
     KeyChain \
+
+# PRODUCT_PACKAGES += \
     Keyguard \
+
+PRODUCT_PACKAGES += \
     LatinIME \
+
+# PRODUCT_PACKAGES += \
     Launcher2 \
+
+PRODUCT_PACKAGES += \
     ManagedProvisioning \
+
+PRODUCT_PACKAGES += \
     MtpDocumentsProvider \
+
+# PRODUCT_PACKAGES += \
     PicoTts \
+
+# PRODUCT_PACKAGES += \
     PacProcessor \
+
+# PRODUCT_PACKAGES += \
     libpac \
+
+# PRODUCT_PACKAGES += \
     PrintSpooler \
+
+# PRODUCT_PACKAGES += \
     PrintRecommendationService \
+
+# PRODUCT_PACKAGES += \
     ProxyHandler \
+
+# PRODUCT_PACKAGES += \
     QuickSearchBox \
+
+# PRODUCT_PACKAGES += \
     Settings \
+
+# PRODUCT_PACKAGES += \
     SharedStorageBackup \
+
+PRODUCT_PACKAGES += \
     StorageManager \
+
+PRODUCT_PACKAGES += \
     Telecom \
+
+PRODUCT_PACKAGES += \
     TeleService \
+
+# PRODUCT_PACKAGES += \
     VpnDialogs \
+
+# PRODUCT_PACKAGES += \
     MmsService
 
 # $(call inherit-product, $(SRC_TARGET_DIR)/product/core_base.mk)
@@ -822,22 +894,52 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.config.notification_sound=OnTheHunt.ogg \
     ro.config.alarm_alert=Alarm_Classic.ogg
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     ContactsProvider \
+
+PRODUCT_PACKAGES += \
     DefaultContainerService \
+
+# PRODUCT_PACKAGES += \
     Home \
+
+PRODUCT_PACKAGES += \
     TelephonyProvider \
+
+PRODUCT_PACKAGES += \
     UserDictionaryProvider \
+
+# PRODUCT_PACKAGES += \
     atrace \
+
+PRODUCT_PACKAGES += \
     libandroidfw \
+
+PRODUCT_PACKAGES += \
     libaudiopreprocessing \
+
+PRODUCT_PACKAGES += \
     libaudioutils \
+
+PRODUCT_PACKAGES += \
     libfilterpack_imageproc \
+
+PRODUCT_PACKAGES += \
     libgabi++ \
+
+PRODUCT_PACKAGES += \
     libmdnssd \
+
+PRODUCT_PACKAGES += \
     libnfc_ndef \
+
+PRODUCT_PACKAGES += \
     libpowermanager \
+
+PRODUCT_PACKAGES += \
     libspeexresampler \
+
+PRODUCT_PACKAGES += \
     libstagefright_soft_aacdec \
     libstagefright_soft_aacenc \
     libstagefright_soft_amrdec \
@@ -858,27 +960,63 @@ PRODUCT_PACKAGES += \
     libstagefright_soft_vorbisdec \
     libstagefright_soft_vpxdec \
     libstagefright_soft_vpxenc \
+
+PRODUCT_PACKAGES += \
     libvariablespeed \
+
+PRODUCT_PACKAGES += \
     libwebrtc_audio_preprocessing \
+
+PRODUCT_PACKAGES += \
     mdnsd \
+
+PRODUCT_PACKAGES += \
     requestsync \
+
+PRODUCT_PACKAGES += \
     wifi-service
 
 # $(call inherit-product, $(SRC_TARGET_DIR)/product/core_minimal.mk)
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     BackupRestoreConfirmation \
+
+# PRODUCT_PACKAGES += \
     CtsShimPrebuilt \
+
+# PRODUCT_PACKAGES += \
     CtsShimPrivPrebuilt \
+
+PRODUCT_PACKAGES += \
     DownloadProvider \
+
+PRODUCT_PACKAGES += \
     ExtShared \
+
+PRODUCT_PACKAGES += \
     ExtServices \
+
+# PRODUCT_PACKAGES += \
     HTMLViewer \
+
+PRODUCT_PACKAGES += \
     MediaProvider \
+
+PRODUCT_PACKAGES += \
     PackageInstaller \
+
+PRODUCT_PACKAGES += \
     SettingsProvider \
+
+# PRODUCT_PACKAGES += \
     Shell \
+
+PRODUCT_PACKAGES += \
     StatementService \
+
+# PRODUCT_PACKAGES += \
     WallpaperBackup \
+
+PRODUCT_PACKAGES += \
     bcc \
     bu \
     com.android.future.usb.accessory \
@@ -1165,7 +1303,6 @@ PRODUCT_COPY_FILES += $(call add-to-product-copy-files-if-exists,\
 PRODUCT_PACKAGES += \
     adb \
     adbd \
-    atrace \
     bootanimation \
     bootstat \
     cmd \
