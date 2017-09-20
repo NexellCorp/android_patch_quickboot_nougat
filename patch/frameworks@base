@@ -1,0 +1,772 @@
+diff --git core/java/android/os/UserManager.java core/java/android/os/UserManager.java
+index 85b010a..d1d85fd 100644
+--- core/java/android/os/UserManager.java
++++ core/java/android/os/UserManager.java
+@@ -1989,12 +1989,7 @@ public class UserManager {
+      * @return a value greater than or equal to 1
+      */
+     public static int getMaxSupportedUsers() {
+-        // Don't allow multiple users on certain builds
+-        if (android.os.Build.ID.startsWith("JVP")) return 1;
+-        // Svelte devices don't get multi-user.
+-        if (ActivityManager.isLowRamDeviceStatic()) return 1;
+-        return SystemProperties.getInt("fw.max_users",
+-                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
++		return 1;
+     }
+ 
+     /**
+diff --git core/java/android/os/storage/StorageManager.java core/java/android/os/storage/StorageManager.java
+index c5507b9..b45e065 100644
+--- core/java/android/os/storage/StorageManager.java
++++ core/java/android/os/storage/StorageManager.java
+@@ -1113,22 +1113,7 @@ public class StorageManager {
+ 
+     /** {@hide} */
+     public static boolean isUserKeyUnlocked(int userId) {
+-        if (sMountService == null) {
+-            sMountService = IMountService.Stub
+-                    .asInterface(ServiceManager.getService("mount"));
+-        }
+-        if (sMountService == null) {
+-            Slog.w(TAG, "Early during boot, assuming locked");
+-            return false;
+-        }
+-        final long token = Binder.clearCallingIdentity();
+-        try {
+-            return sMountService.isUserKeyUnlocked(userId);
+-        } catch (RemoteException e) {
+-            throw e.rethrowAsRuntimeException();
+-        } finally {
+-            Binder.restoreCallingIdentity(token);
+-        }
++		return true;
+     }
+ 
+     /**
+diff --git core/java/com/android/internal/widget/LockPatternUtils.java core/java/com/android/internal/widget/LockPatternUtils.java
+index d49d433..56353c7 100644
+--- core/java/com/android/internal/widget/LockPatternUtils.java
++++ core/java/com/android/internal/widget/LockPatternUtils.java
+@@ -614,8 +614,7 @@ public class LockPatternUtils {
+      * @return true if lock screen is disabled
+      */
+     public boolean isLockScreenDisabled(int userId) {
+-        return !isSecure(userId) &&
+-                getBoolean(DISABLE_LOCKSCREEN_KEY, false, userId);
++		return true;
+     }
+ 
+     /**
+diff --git packages/SystemUI/proguard.flags packages/SystemUI/proguard.flags
+index d0c2d29..cae67cd 100644
+--- packages/SystemUI/proguard.flags
++++ packages/SystemUI/proguard.flags
+@@ -36,3 +36,4 @@
+ 
+ -keep class ** extends android.support.v14.preference.PreferenceFragment
+ -keep class com.android.systemui.tuner.*
++-keep class com.android.systemui.statusbar.avn.AVNStatusBar
+diff --git packages/SystemUI/res/values/config.xml packages/SystemUI/res/values/config.xml
+index 0fa9a85..6497d9c 100644
+--- packages/SystemUI/res/values/config.xml
++++ packages/SystemUI/res/values/config.xml
+@@ -43,7 +43,7 @@
+ 
+     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
+      interface.  This name is in the ComponentName flattened format (package/class)  -->
+-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.PhoneStatusBar</string>
++    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.avn.AVNStatusBar</string>
+ 
+     <!-- Whether or not we show the number in the bar. -->
+     <bool name="config_statusBarShowNumber">false</bool>
+diff --git packages/SystemUI/src/com/android/systemui/SystemUIApplication.java packages/SystemUI/src/com/android/systemui/SystemUIApplication.java
+index 52b5a54..2b83151 100644
+--- packages/SystemUI/src/com/android/systemui/SystemUIApplication.java
++++ packages/SystemUI/src/com/android/systemui/SystemUIApplication.java
+@@ -44,19 +44,19 @@ public class SystemUIApplication extends Application {
+      * The classes of the stuff to start.
+      */
+     private final Class<?>[] SERVICES = new Class[] {
+-            com.android.systemui.tuner.TunerService.class,
++            // com.android.systemui.tuner.TunerService.class,
+             com.android.systemui.keyguard.KeyguardViewMediator.class,
+             com.android.systemui.recents.Recents.class,
+             com.android.systemui.volume.VolumeUI.class,
+-            Divider.class,
++            // Divider.class,
+             com.android.systemui.statusbar.SystemBars.class,
+             com.android.systemui.usb.StorageNotification.class,
+             com.android.systemui.power.PowerUI.class,
+             com.android.systemui.media.RingtonePlayer.class,
+             com.android.systemui.keyboard.KeyboardUI.class,
+-            com.android.systemui.tv.pip.PipUI.class,
++            // com.android.systemui.tv.pip.PipUI.class,
+             com.android.systemui.shortcut.ShortcutKeyDispatcher.class,
+-            com.android.systemui.VendorServices.class
++            // com.android.systemui.VendorServices.class
+     };
+ 
+     /**
+diff --git packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+index c7b621b..23c5f00 100644
+--- packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
++++ packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+@@ -569,7 +569,7 @@ public class KeyguardViewMediator extends SystemUI {
+ 
+         @Override
+         public void setNeedsInput(boolean needsInput) {
+-            mStatusBarKeyguardViewManager.setNeedsInput(needsInput);
++            // mStatusBarKeyguardViewManager.setNeedsInput(needsInput);
+         }
+ 
+         @Override
+@@ -577,7 +577,7 @@ public class KeyguardViewMediator extends SystemUI {
+             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardDonePending");
+             mKeyguardDonePending = true;
+             mHideAnimationRun = true;
+-            mStatusBarKeyguardViewManager.startPreHideAnimation(null /* finishRunnable */);
++            // mStatusBarKeyguardViewManager.startPreHideAnimation(null #<{(| finishRunnable |)}>#);
+             mHandler.sendEmptyMessageDelayed(KEYGUARD_DONE_PENDING_TIMEOUT,
+                     KEYGUARD_DONE_PENDING_TIMEOUT_MS);
+             if (strongAuth) {
+@@ -1169,7 +1169,7 @@ public class KeyguardViewMediator extends SystemUI {
+ 
+             if (mOccluded != isOccluded) {
+                 mOccluded = isOccluded;
+-                mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate);
++                // mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate);
+                 updateActivityLockScreenState();
+                 adjustStatusBarLocked();
+             }
+@@ -1240,11 +1240,11 @@ public class KeyguardViewMediator extends SystemUI {
+         }
+ 
+         // if the keyguard is already showing, don't bother
+-        if (mStatusBarKeyguardViewManager.isShowing()) {
+-            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
+-            resetStateLocked();
+-            return;
+-        }
++        // if (mStatusBarKeyguardViewManager.isShowing()) {
++        //     if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
++        //     resetStateLocked();
++        //     return;
++        // }
+ 
+         // In split system user mode, we never unlock system user.
+         if (!mustNotUnlockCurrentUser()
+@@ -1299,7 +1299,7 @@ public class KeyguardViewMediator extends SystemUI {
+      */
+     public void handleDismiss(boolean allowWhileOccluded) {
+         if (mShowing && (allowWhileOccluded || !mOccluded)) {
+-            mStatusBarKeyguardViewManager.dismiss();
++            // mStatusBarKeyguardViewManager.dismiss();
+         }
+     }
+ 
+@@ -1675,7 +1675,7 @@ public class KeyguardViewMediator extends SystemUI {
+             }
+ 
+             setShowingLocked(true);
+-            mStatusBarKeyguardViewManager.show(options);
++            // mStatusBarKeyguardViewManager.show(options);
+             mHiding = false;
+             mWakeAndUnlocking = false;
+             resetKeyguardDonePendingLocked();
+@@ -1695,28 +1695,28 @@ public class KeyguardViewMediator extends SystemUI {
+         public void run() {
+             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
+             if (DEBUG) Log.d(TAG, "keyguardGoingAway");
+-            try {
+-                mStatusBarKeyguardViewManager.keyguardGoingAway();
+-
+-                int flags = 0;
+-                if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
+-                        || mWakeAndUnlocking) {
+-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+-                }
+-                if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()) {
+-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
+-                }
+-                if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
+-                    flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
+-                }
++            // try {
++                // mStatusBarKeyguardViewManager.keyguardGoingAway();
++                //
++                // int flags = 0;
++                // if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
++                //         || mWakeAndUnlocking) {
++                //     flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
++                // }
++                // if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()) {
++                //     flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
++                // }
++                // if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
++                //     flags |= WindowManagerPolicy.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
++                // }
+ 
+                 // Don't actually hide the Keyguard at the moment, wait for window
+                 // manager until it tells us it's safe to do so with
+                 // startKeyguardExitAnimation.
+-                ActivityManagerNative.getDefault().keyguardGoingAway(flags);
+-            } catch (RemoteException e) {
+-                Log.e(TAG, "Error while calling WindowManager", e);
+-            }
++                // ActivityManagerNative.getDefault().keyguardGoingAway(flags);
++            // } catch (RemoteException e) {
++            //     Log.e(TAG, "Error while calling WindowManager", e);
++            // }
+             Trace.endSection();
+         }
+     };
+@@ -1741,7 +1741,7 @@ public class KeyguardViewMediator extends SystemUI {
+             mHiding = true;
+             if (mShowing && !mOccluded) {
+                 if (!mHideAnimationRun) {
+-                    mStatusBarKeyguardViewManager.startPreHideAnimation(mKeyguardGoingAwayRunnable);
++                    // mStatusBarKeyguardViewManager.startPreHideAnimation(mKeyguardGoingAwayRunnable);
+                 } else {
+                     mKeyguardGoingAwayRunnable.run();
+                 }
+@@ -1760,7 +1760,7 @@ public class KeyguardViewMediator extends SystemUI {
+     private void handleOnActivityDrawn() {
+         if (DEBUG) Log.d(TAG, "handleOnActivityDrawn: mKeyguardDonePending=" + mKeyguardDonePending);
+         if (mKeyguardDonePending) {
+-            mStatusBarKeyguardViewManager.onActivityDrawn();
++            // mStatusBarKeyguardViewManager.onActivityDrawn();
+         }
+     }
+ 
+@@ -1780,7 +1780,7 @@ public class KeyguardViewMediator extends SystemUI {
+                 // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
+                 // the next draw from here so we don't have to wait for window manager to signal
+                 // this to our ViewRootImpl.
+-                mStatusBarKeyguardViewManager.getViewRootImpl().setReportNextDraw();
++                // mStatusBarKeyguardViewManager.getViewRootImpl().setReportNextDraw();
+                 notifyDrawn(mDrawnCallback);
+                 mDrawnCallback = null;
+             }
+@@ -1793,7 +1793,7 @@ public class KeyguardViewMediator extends SystemUI {
+ 
+             mWakeAndUnlocking = false;
+             setShowingLocked(false);
+-            mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
++            // mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
+             resetKeyguardDonePendingLocked();
+             mHideAnimationRun = false;
+             updateActivityLockScreenState();
+@@ -1843,7 +1843,7 @@ public class KeyguardViewMediator extends SystemUI {
+     private void handleReset() {
+         synchronized (KeyguardViewMediator.this) {
+             if (DEBUG) Log.d(TAG, "handleReset");
+-            mStatusBarKeyguardViewManager.reset();
++            // mStatusBarKeyguardViewManager.reset();
+         }
+     }
+ 
+@@ -1856,7 +1856,7 @@ public class KeyguardViewMediator extends SystemUI {
+         synchronized (KeyguardViewMediator.this) {
+             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
+             setShowingLocked(true);
+-            mStatusBarKeyguardViewManager.verifyUnlock();
++            // mStatusBarKeyguardViewManager.verifyUnlock();
+             updateActivityLockScreenState();
+         }
+         Trace.endSection();
+@@ -1865,7 +1865,7 @@ public class KeyguardViewMediator extends SystemUI {
+     private void handleNotifyStartedGoingToSleep() {
+         synchronized (KeyguardViewMediator.this) {
+             if (DEBUG) Log.d(TAG, "handleNotifyStartedGoingToSleep");
+-            mStatusBarKeyguardViewManager.onStartedGoingToSleep();
++            // mStatusBarKeyguardViewManager.onStartedGoingToSleep();
+         }
+     }
+ 
+@@ -1876,16 +1876,16 @@ public class KeyguardViewMediator extends SystemUI {
+     private void handleNotifyFinishedGoingToSleep() {
+         synchronized (KeyguardViewMediator.this) {
+             if (DEBUG) Log.d(TAG, "handleNotifyFinishedGoingToSleep");
+-            mStatusBarKeyguardViewManager.onFinishedGoingToSleep();
++            // mStatusBarKeyguardViewManager.onFinishedGoingToSleep();
+         }
+     }
+ 
+     private void handleNotifyStartedWakingUp() {
+         Trace.beginSection("KeyguardViewMediator#handleMotifyStartedWakingUp");
+-        synchronized (KeyguardViewMediator.this) {
+-            if (DEBUG) Log.d(TAG, "handleNotifyWakingUp");
+-            mStatusBarKeyguardViewManager.onStartedWakingUp();
+-        }
++        // synchronized (KeyguardViewMediator.this) {
++        //     if (DEBUG) Log.d(TAG, "handleNotifyWakingUp");
++        //     mStatusBarKeyguardViewManager.onStartedWakingUp();
++        // }
+         Trace.endSection();
+     }
+ 
+@@ -1893,7 +1893,7 @@ public class KeyguardViewMediator extends SystemUI {
+         Trace.beginSection("KeyguardViewMediator#handleNotifyScreenTurningOn");
+         synchronized (KeyguardViewMediator.this) {
+             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurningOn");
+-            mStatusBarKeyguardViewManager.onScreenTurningOn();
++            // mStatusBarKeyguardViewManager.onScreenTurningOn();
+             if (callback != null) {
+                 if (mWakeAndUnlocking) {
+                     mDrawnCallback = callback;
+@@ -1909,7 +1909,7 @@ public class KeyguardViewMediator extends SystemUI {
+         Trace.beginSection("KeyguardViewMediator#handleNotifyScreenTurnedOn");
+         synchronized (this) {
+             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOn");
+-            mStatusBarKeyguardViewManager.onScreenTurnedOn();
++            // mStatusBarKeyguardViewManager.onScreenTurnedOn();
+         }
+         Trace.endSection();
+     }
+@@ -1917,7 +1917,7 @@ public class KeyguardViewMediator extends SystemUI {
+     private void handleNotifyScreenTurnedOff() {
+         synchronized (this) {
+             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
+-            mStatusBarKeyguardViewManager.onScreenTurnedOff();
++            // mStatusBarKeyguardViewManager.onScreenTurnedOff();
+             mDrawnCallback = null;
+             mWakeAndUnlocking = false;
+         }
+diff --git services/core/java/com/android/server/InputMethodManagerService.java services/core/java/com/android/server/InputMethodManagerService.java
+index df1b6f5..be04ecd 100644
+--- services/core/java/com/android/server/InputMethodManagerService.java
++++ services/core/java/com/android/server/InputMethodManagerService.java
+@@ -814,6 +814,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
+             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                 StatusBarManagerService statusBarService = (StatusBarManagerService) ServiceManager
+                         .getService(Context.STATUS_BAR_SERVICE);
++				if (statusBarService != null)
+                 mService.systemRunning(statusBarService);
+             }
+         }
+diff --git services/core/java/com/android/server/am/ActivityManagerService.java services/core/java/com/android/server/am/ActivityManagerService.java
+index 91c4571..b15e7b7 100644
+--- services/core/java/com/android/server/am/ActivityManagerService.java
++++ services/core/java/com/android/server/am/ActivityManagerService.java
+@@ -13401,6 +13401,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+             // Only start up encryption-aware persistent apps; once user is
+             // unlocked we'll come back around and start unaware apps
+             startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
++			startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+ 
+             // Start up initial activity.
+             mBooting = true;
+@@ -13415,6 +13416,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+                     throw e.rethrowAsRuntimeException();
+                 }
+             }
++			ensureBootCompleted();
+             startHomeActivityLocked(currentUserId, "systemReady");
+ 
+             try {
+diff --git services/core/java/com/android/server/am/UserController.java services/core/java/com/android/server/am/UserController.java
+index 4fd26b3..724be37 100644
+--- services/core/java/com/android/server/am/UserController.java
++++ services/core/java/com/android/server/am/UserController.java
+@@ -110,7 +110,7 @@ final class UserController {
+     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserController" : TAG_AM;
+ 
+     // Maximum number of users we allow to be running at a time.
+-    static final int MAX_RUNNING_USERS = 3;
++    static final int MAX_RUNNING_USERS = 1;
+ 
+     // Amount of time we wait for observers to handle a user switch before
+     // giving up on them and unfreezing the screen.
+diff --git services/core/java/com/android/server/wm/WindowManagerService.java services/core/java/com/android/server/wm/WindowManagerService.java
+index ca2610a..df4321e 100644
+--- services/core/java/com/android/server/wm/WindowManagerService.java
++++ services/core/java/com/android/server/wm/WindowManagerService.java
+@@ -5908,6 +5908,7 @@ public class WindowManagerService extends IWindowManager.Stub
+     }
+ 
+     public void enableScreenAfterBoot() {
++		mForceDisplayEnabled = true;
+         synchronized(mWindowMap) {
+             if (DEBUG_BOOT) {
+                 RuntimeException here = new RuntimeException("here");
+diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
+index 653c5e9..1b19e58 100644
+--- services/java/com/android/server/SystemServer.java
++++ services/java/com/android/server/SystemServer.java
+@@ -513,7 +513,7 @@ public final class SystemServer {
+                 LocalServices.getService(UsageStatsManagerInternal.class));
+ 
+         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
+-        mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
++        // mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
+     }
+ 
+     /**
+@@ -1336,12 +1336,12 @@ public final class SystemServer {
+                 }
+                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+ 
+-                if (!mOnlyCore) {
+-                    Slog.i(TAG, "WebViewFactory preparation");
+-                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
+-                    mWebViewUpdateService.prepareWebViewInSystemServer();
+-                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+-                }
++                // if (!mOnlyCore) {
++                //     Slog.i(TAG, "WebViewFactory preparation");
++                //     Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
++                //     mWebViewUpdateService.prepareWebViewInSystemServer();
++                //     Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
++                // }
+ 
+                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "StartSystemUI");
+                 try {
+diff --git packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java
+new file mode 100644
+index 0000000..450a946
+--- /dev/null
++++ packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java
+@@ -0,0 +1,252 @@
++/*
++ * Copyright (C) 2012 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.systemui.statusbar.avn;
++
++import android.os.IBinder;
++import android.os.RemoteException;
++import android.service.notification.NotificationListenerService.RankingMap;
++import android.service.notification.StatusBarNotification;
++import android.view.View;
++import android.view.ViewGroup.LayoutParams;
++import android.view.WindowManager;
++import android.util.Log;
++import android.util.Slog;
++import android.graphics.PixelFormat;
++import android.graphics.Rect;
++import android.content.ComponentName;
++import android.service.notification.NotificationListenerService;
++import android.service.notification.NotificationListenerService.RankingMap;
++import android.service.notification.StatusBarNotification;
++
++import android.app.ActivityManager;
++import android.app.ActivityManagerNative;
++import android.app.IActivityManager;
++
++
++import com.android.internal.statusbar.StatusBarIcon;
++import com.android.systemui.statusbar.ActivatableNotificationView;
++import com.android.systemui.statusbar.BaseStatusBar;
++import com.android.systemui.statusbar.NotificationData;
++import com.android.systemui.statusbar.NotificationData.Entry;
++import com.android.systemui.R;
++
++import java.util.Map;
++import java.util.HashMap;
++
++/*
++ * Status bar implementation for "large screen" products that mostly present no on-screen nav
++ */
++public class AVNStatusBar extends BaseStatusBar {
++    static final String TAG = "AVNStatusBar";
++    //public static final boolean DEBUG = BaseStatusBar.DEBUG;
++    public static final boolean DEBUG = true;
++
++    public void notifyUiVisibilityChanged(int vis) {
++        try {
++            mWindowManagerService.statusBarVisibilityChanged(vis);
++        } catch (RemoteException ex) {
++        }
++    }
++
++    @Override
++    public void start() {
++        super.start(); // call createAndAddWindows()
++
++        if (DEBUG) Slog.d(TAG, "start");
++    }
++
++    @Override
++    public void removeIcon(String slot) {
++    }
++
++    @Override
++    protected void updateNotificationRanking(RankingMap ranking) {
++    }
++
++    @Override
++    public void removeNotification(String key, RankingMap ranking) {
++    }
++
++    @Override
++    public void disable(int state1, int state2, boolean animate) {
++    }
++
++    @Override
++    public void animateExpandNotificationsPanel() {
++    }
++
++    @Override
++    public void animateCollapsePanels(int flags) {
++    }
++
++    @Override // CommandQueue
++    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
++            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
++    }
++
++    @Override
++    public void topAppWindowChanged(boolean visible) {
++    }
++
++    @Override
++    public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
++            boolean showImeSwitcher) {
++    }
++
++    @Override
++    public void toggleRecentApps() {
++    }
++
++    @Override // CommandQueue
++    public void setWindowState(int window, int state) {
++    }
++
++    @Override // CommandQueue
++    public void buzzBeepBlinked() {
++    }
++
++    @Override // CommandQueue
++    public void notificationLightOff() {
++    }
++
++    @Override // CommandQueue
++    public void notificationLightPulse(int argb, int onMillis, int offMillis) {
++    }
++
++    @Override
++    protected void setAreThereNotifications() {
++    }
++
++    @Override
++    protected void updateNotifications() {
++    }
++
++    @Override
++    public boolean shouldDisableNavbarGestures() {
++		return true;
++    }
++
++    public View getStatusBarView() {
++        return null;
++    }
++
++    @Override
++    protected void createAndAddWindows() {
++        if (DEBUG) Slog.d(TAG, "createAndAddWindows");
++    }
++
++    @Override
++    protected void refreshLayout(int layoutDirection) {
++    }
++
++    @Override
++    public void onActivated(ActivatableNotificationView view) {
++    }
++
++    @Override
++    public void onActivationReset(ActivatableNotificationView view) {
++    }
++
++    @Override
++    public void showScreenPinningRequest(int taskId) {
++    }
++
++    @Override
++    public void appTransitionFinished() {
++    }
++
++    @Override
++    public void addQsTile(ComponentName tile) {
++    }
++
++    @Override
++    public void remQsTile(ComponentName tile) {
++    }
++
++    @Override
++    public void animateExpandSettingsPanel(String subPanel) {
++    }
++
++    @Override
++    protected void toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
++    }
++
++    @Override
++    public void setIcon(String slot, StatusBarIcon icon) {
++    }
++
++    @Override
++    public boolean isPanelFullyCollapsed() {
++		return false;
++    }
++
++    @Override
++    public void appTransitionPending() {
++    }
++
++    @Override
++    public void onCameraLaunchGestureDetected(int source) {
++    }
++
++    @Override
++    public void appTransitionStarting(long startTime, long duration) {
++    }
++
++    @Override
++    public void handleSystemNavigationKey(int key) {
++    }
++
++    @Override
++    public void addNotification(StatusBarNotification notification, RankingMap ranking,
++            Entry oldEntry) {
++    }
++
++    @Override
++    public void showTvPictureInPictureMenu() {
++    }
++
++    @Override
++    protected void setHeadsUpUser(int newUserId) {
++    }
++
++    @Override
++    public void appTransitionCancelled() {
++    }
++
++    @Override
++    protected void updateHeadsUp(String key, Entry entry, boolean shouldPeek,
++            boolean alertAgain) {
++    }
++
++    @Override
++    protected int getMaxKeyguardNotifications(boolean recompute) {
++		return 0;
++    }
++
++    @Override
++    public void clickTile(ComponentName tile) {
++    }
++
++    @Override
++    protected boolean isSnoozedPackage(StatusBarNotification sbn) {
++		return false;
++    }
++
++    @Override
++    public void maybeEscalateHeadsUp() {
++    }
++}
+diff --git packages/SystemUI/src/com/android/systemui/statusbar/avn/ApplicationInfo.java packages/SystemUI/src/com/android/systemui/statusbar/avn/ApplicationInfo.java
+new file mode 100644
+index 0000000..736993e
+--- /dev/null
++++ packages/SystemUI/src/com/android/systemui/statusbar/avn/ApplicationInfo.java
+@@ -0,0 +1,84 @@
++/*
++ * Copyright (C) 2007 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.systemui.statusbar.avn;
++
++import android.content.ComponentName;
++import android.content.Intent;
++import android.graphics.drawable.Drawable;
++
++/**
++ * Represents a launchable application. An application is made of a name (or title), an intent
++ * and an icon.
++ */
++class ApplicationInfo {
++    /**
++     * The application name.
++     */
++    CharSequence title;
++
++    /**
++     * The intent used to start the application.
++     */
++    Intent intent;
++
++    /**
++     * The application icon.
++     */
++    Drawable icon;
++
++    /**
++     * When set to true, indicates that the icon has been resized.
++     */
++    boolean filtered;
++
++    /**
++     * Creates the application intent based on a component name and various launch flags.
++     *
++     * @param className the class name of the component representing the intent
++     * @param launchFlags the launch flags
++     */
++    final void setActivity(ComponentName className, int launchFlags) {
++        intent = new Intent(Intent.ACTION_MAIN);
++        intent.addCategory(Intent.CATEGORY_LAUNCHER);
++        intent.setComponent(className);
++        intent.setFlags(launchFlags);
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        if (this == o) {
++            return true;
++        }
++        if (!(o instanceof ApplicationInfo)) {
++            return false;
++        }
++
++        ApplicationInfo that = (ApplicationInfo) o;
++        return title.equals(that.title) &&
++                intent.getComponent().getClassName().equals(
++                        that.intent.getComponent().getClassName());
++    }
++
++    @Override
++    public int hashCode() {
++        int result;
++        result = (title != null ? title.hashCode() : 0);
++        final String name = intent.getComponent().getClassName();
++        result = 31 * result + (name != null ? name.hashCode() : 0);
++        return result;
++    }
++}
