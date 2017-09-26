@@ -770,3 +770,50 @@ index 0000000..736993e
 +        return result;
 +    }
 +}
+diff --git services/core/java/com/android/server/pm/PackageInstallerService.java services/core/java/com/android/server/pm/PackageInstallerService.java
+index d25abbf..b855633 100644
+--- services/core/java/com/android/server/pm/PackageInstallerService.java
++++ services/core/java/com/android/server/pm/PackageInstallerService.java
+@@ -577,11 +577,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
+     private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
+             throws IOException {
+         final int callingUid = Binder.getCallingUid();
+-        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
+-
+-        if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
+-            throw new SecurityException("User restriction prevents installing");
+-        }
+ 
+         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
+diff --git services/core/java/com/android/server/pm/PackageInstallerSession.java services/core/java/com/android/server/pm/PackageInstallerSession.java
+index 2ece99f..08671e2 100644
+--- services/core/java/com/android/server/pm/PackageInstallerSession.java
++++ services/core/java/com/android/server/pm/PackageInstallerSession.java
+@@ -244,6 +244,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
+         this.stageDir = stageDir;
+         this.stageCid = stageCid;
+ 
++		installerUid = Process.ROOT_UID;
++
+         if ((stageDir == null) == (stageCid == null)) {
+             throw new IllegalArgumentException(
+                     "Exactly one of stageDir or stageCid stage must be set");
+diff --git services/core/java/com/android/server/pm/PackageManagerShellCommand.java services/core/java/com/android/server/pm/PackageManagerShellCommand.java
+index 3bfa6b8..4b0a9d8 100644
+--- services/core/java/com/android/server/pm/PackageManagerShellCommand.java
++++ services/core/java/com/android/server/pm/PackageManagerShellCommand.java
+@@ -1160,11 +1160,8 @@ class PackageManagerShellCommand extends ShellCommand {
+ 
+     private int doCreateSession(SessionParams params, String installerPackageName, int userId)
+             throws RemoteException {
+-        userId = translateUserId(userId, "runInstallCreate");
+-        if (userId == UserHandle.USER_ALL) {
+-            userId = UserHandle.USER_SYSTEM;
+-            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+-        }
++		userId = UserHandle.USER_SYSTEM;
++		params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+ 
+         final int sessionId = mInterface.getPackageInstaller()
+                 .createSession(params, installerPackageName, userId);
