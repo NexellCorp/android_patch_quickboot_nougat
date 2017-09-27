@@ -379,7 +379,7 @@ index 4fd26b3..724be37 100644
      // Amount of time we wait for observers to handle a user switch before
      // giving up on them and unfreezing the screen.
 diff --git services/core/java/com/android/server/wm/WindowManagerService.java services/core/java/com/android/server/wm/WindowManagerService.java
-index ca2610a..df4321e 100644
+index ca2610a..1ff417a 100644
 --- services/core/java/com/android/server/wm/WindowManagerService.java
 +++ services/core/java/com/android/server/wm/WindowManagerService.java
 @@ -5908,6 +5908,7 @@ public class WindowManagerService extends IWindowManager.Stub
@@ -390,6 +390,79 @@ index ca2610a..df4321e 100644
          synchronized(mWindowMap) {
              if (DEBUG_BOOT) {
                  RuntimeException here = new RuntimeException("here");
+@@ -5930,6 +5931,8 @@ public class WindowManagerService extends IWindowManager.Stub
+         mPolicy.systemBooted();
+ 
+         performEnableScreen();
++
++		mH.sendEmptyMessageDelayed(H.BOOT_TIMEOUT, 1*1200);
+     }
+ 
+     @Override
+@@ -5958,14 +5961,24 @@ public class WindowManagerService extends IWindowManager.Stub
+     }
+ 
+     public void performBootTimeout() {
+-        synchronized(mWindowMap) {
+-            if (mDisplayEnabled) {
+-                return;
+-            }
+-            Slog.w(TAG_WM, "***** BOOT TIMEOUT: forcing display enabled");
+-            mForceDisplayEnabled = true;
+-        }
+-        performEnableScreen();
++		if (!mBootAnimationStopped) {
++			// Do this one time.
++			Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
++			try {
++				IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
++				if (surfaceFlinger != null) {
++					//Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
++					Parcel data = Parcel.obtain();
++					data.writeInterfaceToken("android.ui.ISurfaceComposer");
++					surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
++							data, null, 0);
++					data.recycle();
++				}
++			} catch (RemoteException ex) {
++				Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
++			}
++			mBootAnimationStopped = true;
++		}
+     }
+ 
+     private boolean checkWaitingForWindowsLocked() {
+@@ -6045,30 +6058,6 @@ public class WindowManagerService extends IWindowManager.Stub
+                 return;
+             }
+ 
+-            if (!mBootAnimationStopped) {
+-                // Do this one time.
+-                Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
+-                try {
+-                    IBinder surfaceFlinger = ServiceManager.getService("SurfaceFlinger");
+-                    if (surfaceFlinger != null) {
+-                        //Slog.i(TAG_WM, "******* TELLING SURFACE FLINGER WE ARE BOOTED!");
+-                        Parcel data = Parcel.obtain();
+-                        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+-                        surfaceFlinger.transact(IBinder.FIRST_CALL_TRANSACTION, // BOOT_FINISHED
+-                                data, null, 0);
+-                        data.recycle();
+-                    }
+-                } catch (RemoteException ex) {
+-                    Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
+-                }
+-                mBootAnimationStopped = true;
+-            }
+-
+-            if (!mForceDisplayEnabled && !checkBootAnimationCompleteLocked()) {
+-                if (DEBUG_BOOT) Slog.i(TAG_WM, "performEnableScreen: Waiting for anim complete");
+-                return;
+-            }
+-
+             EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
+             Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
+             mDisplayEnabled = true;
 diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
 index 653c5e9..1b19e58 100644
 --- services/java/com/android/server/SystemServer.java
@@ -817,3 +890,16 @@ index 3bfa6b8..4b0a9d8 100644
  
          final int sessionId = mInterface.getPackageInstaller()
                  .createSession(params, installerPackageName, userId);
+diff --git services/core/java/com/android/server/policy/PhoneWindowManager.java services/core/java/com/android/server/policy/PhoneWindowManager.java
+index 889c52a..5d01954 100644
+--- services/core/java/com/android/server/policy/PhoneWindowManager.java
++++ services/core/java/com/android/server/policy/PhoneWindowManager.java
+@@ -6532,7 +6532,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
+ 
+             if (mKeyguardDelegate != null) {
+                 mHandler.removeMessages(MSG_KEYGUARD_DRAWN_TIMEOUT);
+-                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 1000);
++                mHandler.sendEmptyMessageDelayed(MSG_KEYGUARD_DRAWN_TIMEOUT, 100);
+                 mKeyguardDelegate.onScreenTurningOn(mKeyguardDrawnCallback);
+             } else {
+                 if (DEBUG_WAKEUP) Slog.d(TAG,
