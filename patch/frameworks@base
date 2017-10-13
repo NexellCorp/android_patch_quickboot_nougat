@@ -463,38 +463,6 @@ index ca2610a..1ff417a 100644
              EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
              Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
              mDisplayEnabled = true;
-diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
-index 653c5e9..1b19e58 100644
---- services/java/com/android/server/SystemServer.java
-+++ services/java/com/android/server/SystemServer.java
-@@ -513,7 +513,7 @@ public final class SystemServer {
-                 LocalServices.getService(UsageStatsManagerInternal.class));
- 
-         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
--        mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
-+        // mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
-     }
- 
-     /**
-@@ -1336,12 +1336,12 @@ public final class SystemServer {
-                 }
-                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
- 
--                if (!mOnlyCore) {
--                    Slog.i(TAG, "WebViewFactory preparation");
--                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
--                    mWebViewUpdateService.prepareWebViewInSystemServer();
--                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
--                }
-+                // if (!mOnlyCore) {
-+                //     Slog.i(TAG, "WebViewFactory preparation");
-+                //     Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
-+                //     mWebViewUpdateService.prepareWebViewInSystemServer();
-+                //     Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-+                // }
- 
-                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "StartSystemUI");
-                 try {
 diff --git packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java
 new file mode 100644
 index 0000000..450a946
