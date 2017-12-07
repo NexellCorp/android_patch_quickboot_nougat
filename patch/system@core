@@ -1,5 +1,195 @@
+diff --git bootstat/bootstat.rc bootstat/bootstat.rc
+index ca8bea2..42f8feb 100644
+--- bootstat/bootstat.rc
++++ bootstat/bootstat.rc
+@@ -1,15 +1,15 @@
+ # This file is the LOCAL_INIT_RC file for the bootstat command.
+ 
+-on post-fs-data
+-    mkdir /data/misc/bootstat 0700 root root
++#on post-fs-data
++#    mkdir /data/misc/bootstat 0700 root root
+ 
+ # Record the time at which the user has successfully entered the pin to decrypt
+ # the device, /data is decrypted, and the system is entering the main boot phase.
+ #
+ # post-fs-data: /data is writable
+ # property:init.svc.bootanim=running: The boot animation is running
+-on post-fs-data && property:init.svc.bootanim=running
+-    exec - root root -- /system/bin/bootstat -r post_decrypt_time_elapsed
++#on post-fs-data && property:init.svc.bootanim=running
++#    exec - root root -- /system/bin/bootstat -r post_decrypt_time_elapsed
+ 
+ # sys.logbootcomplete is a signal to enable the bootstat logging mechanism.
+ # This signaling is necessary to prevent logging boot metrics after a soft
+@@ -21,24 +21,24 @@ on post-fs-data && property:init.svc.bootanim=running
+ # switched off and cannot be switched on until the device hard boots again.
+ 
+ # Enable bootstat logging on boot.
+-on boot
+-    setprop sys.logbootcomplete 1
++#on boot
++#    setprop sys.logbootcomplete 1
+ 
+ # Disable further bootstat logging on a soft reboot. A soft reboot is
+ # signaled by the zygote stopping.
+-on property:init.svc.zygote=stopping
+-    setprop sys.logbootcomplete 0
++#on property:init.svc.zygote=stopping
++#    setprop sys.logbootcomplete 0
+ 
+ # Record boot complete metrics.
+-on property:sys.boot_completed=1 && property:sys.logbootcomplete=1
++#on property:sys.boot_completed=1 && property:sys.logbootcomplete=1
+     # Record boot_complete and related stats (decryption, etc).
+-    exec - root root -- /system/bin/bootstat --record_boot_complete
++#    exec - root root -- /system/bin/bootstat --record_boot_complete
+ 
+     # Record the boot reason.
+-    exec - root root -- /system/bin/bootstat --record_boot_reason
++#    exec - root root -- /system/bin/bootstat --record_boot_reason
+ 
+     # Record time since factory reset.
+-    exec - root root -- /system/bin/bootstat --record_time_since_factory_reset
++#    exec - root root -- /system/bin/bootstat --record_time_since_factory_reset
+ 
+     # Log all boot events.
+-    exec - root root -- /system/bin/bootstat -l
++#    exec - root root -- /system/bin/bootstat -l
+diff --git init/init.cpp init/init.cpp
+index cd2d2e6..11755a4 100644
+--- init/init.cpp
++++ init/init.cpp
+@@ -189,6 +189,7 @@ static int wait_for_coldboot_done_action(const std::vector<std::string>& args) {
+  * time. We do not reboot or halt on failures, as this is a best-effort
+  * attempt.
+  */
++#if 0
+ static int mix_hwrng_into_linux_rng_action(const std::vector<std::string>& args)
+ {
+     int result = -1;
+@@ -250,6 +251,7 @@ ret:
+     }
+     return result;
+ }
++#endif
+ 
+ static void security_failure() {
+     ERROR("Security failure; rebooting into recovery mode...\n");
+@@ -363,6 +365,7 @@ static int console_init_action(const std::vector<std::string>& args)
+         have_console = 1;
+     close(fd);
+ 
++#if 0
+     fd = open("/dev/tty0", O_WRONLY | O_CLOEXEC);
+     if (fd >= 0) {
+         const char *msg;
+@@ -384,6 +387,7 @@ static int console_init_action(const std::vector<std::string>& args)
+         write(fd, msg, strlen(msg));
+         close(fd);
+     }
++#endif
+ 
+     return 0;
+ }
+@@ -515,10 +519,13 @@ static selinux_enforcing_status selinux_status_from_cmdline() {
+ 
+ static bool selinux_is_enforcing(void)
+ {
+-    if (ALLOW_PERMISSIVE_SELINUX) {
++//ZHong car relate add by lihw begin
++    /*if (ALLOW_PERMISSIVE_SELINUX) {
+         return selinux_status_from_cmdline() == SELINUX_ENFORCING;
+-    }
+-    return true;
++    }*/
++    selinux_status_from_cmdline();
++    return false;
++//ZHong car relate add by lihw begin
+ }
+ 
+ int selinux_reload_policy(void)
+@@ -700,7 +707,7 @@ int main(int argc, char** argv) {
+     // Queue an action that waits for coldboot done so we know ueventd has set up all of /dev...
+     am.QueueBuiltinAction(wait_for_coldboot_done_action, "wait_for_coldboot_done");
+     // ... so that we can start queuing up actions that require stuff from /dev.
+-    am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
++    // am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+     am.QueueBuiltinAction(set_mmap_rnd_bits_action, "set_mmap_rnd_bits");
+     am.QueueBuiltinAction(keychord_init_action, "keychord_init");
+     am.QueueBuiltinAction(console_init_action, "console_init");
+@@ -710,7 +717,7 @@ int main(int argc, char** argv) {
+ 
+     // Repeat mix_hwrng_into_linux_rng in case /dev/hw_random or /dev/random
+     // wasn't ready immediately after wait_for_coldboot_done
+-    am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
++    // am.QueueBuiltinAction(mix_hwrng_into_linux_rng_action, "mix_hwrng_into_linux_rng");
+ 
+     // Don't mount filesystems or start core system services in charger mode.
+     std::string bootmode = property_get("ro.bootmode");
+diff --git init/service.cpp init/service.cpp
+index 3149f8e..d96daec 100644
+--- init/service.cpp
++++ init/service.cpp
+@@ -22,6 +22,7 @@
+ #include <sys/wait.h>
+ #include <termios.h>
+ #include <unistd.h>
++#include <sched.h>
+ 
+ #include <selinux/selinux.h>
+ 
+@@ -389,6 +390,17 @@ bool Service::Start() {
+ 
+     pid_t pid = fork();
+     if (pid == 0) {
++		if (!strcmp("servicemanager", name_.c_str()) ||
++			!strcmp("surfaceflinger", name_.c_str()) ||
++			!strcmp("zygote", name_.c_str()) ||
++			!strcmp("bootanim", name_.c_str())) {
++			struct sched_param sched_param = {
++				.sched_priority = 2,
++			};
++			sched_setscheduler(0, SCHED_FIFO, &sched_param);
++			// NOTICE("Service %s sched set to 2\n", name_.c_str());
++		}
++
+         umask(077);
+ 
+         for (const auto& ei : envvars_) {
+@@ -778,7 +790,7 @@ bool ServiceManager::ReapOneProcess() {
+     if (pid == 0) {
+         return false;
+     } else if (pid == -1) {
+-        ERROR("waitpid failed: %s\n", strerror(errno));
++        // ERROR("waitpid failed: %s\n", strerror(errno));
+         return false;
+     }
+ 
+diff --git libcutils/trace-dev.c libcutils/trace-dev.c
+index 778e4f0..a511d3d 100644
+--- libcutils/trace-dev.c
++++ libcutils/trace-dev.c
+@@ -166,6 +166,7 @@ void atrace_update_tags()
+ 
+ static void atrace_init_once()
+ {
++#if 0
+     atrace_marker_fd = open("/sys/kernel/debug/tracing/trace_marker", O_WRONLY | O_CLOEXEC);
+     if (atrace_marker_fd == -1) {
+         ALOGE("Error opening trace file: %s (%d)", strerror(errno), errno);
+@@ -176,6 +177,9 @@ static void atrace_init_once()
+     atrace_enabled_tags = atrace_get_property();
+ 
+ done:
++#else
++    atrace_enabled_tags = 0;
++#endif
+     atomic_store_explicit(&atrace_is_ready, true, memory_order_release);
+ }
+ 
 diff --git rootdir/init.rc rootdir/init.rc
-index 7dc9e55..c629ef6 100644
+index 7dc9e55..aad8a8d 100644
 --- rootdir/init.rc
 +++ rootdir/init.rc
 @@ -14,23 +14,12 @@ on early-init
@@ -26,7 +216,7 @@ index 7dc9e55..c629ef6 100644
      # Mix device-specific information into the entropy pool
      copy /proc/cmdline /dev/urandom
      copy /default.prop /dev/urandom
-@@ -112,9 +101,6 @@ on init
+@@ -112,25 +101,19 @@ on init
      # Disable auto-scaling of scheduler tunables with hotplug. The tunables
      # will vary across devices in unpredictable ways if allowed to scale with
      # cpu cores.
@@ -36,7 +226,23 @@ index 7dc9e55..c629ef6 100644
      write /proc/sys/kernel/sched_child_runs_first 0
  
      write /proc/sys/kernel/randomize_va_space 2
-@@ -218,9 +204,6 @@ on init
+     write /proc/sys/kernel/kptr_restrict 2
+     write /proc/sys/vm/mmap_min_addr 32768
+-    write /proc/sys/net/ipv4/ping_group_range "0 2147483647"
+     write /proc/sys/net/unix/max_dgram_qlen 600
+     write /proc/sys/kernel/sched_rt_runtime_us 950000
+     write /proc/sys/kernel/sched_rt_period_us 1000000
+ 
+     # reflect fwmark from incoming packets onto generated replies
+-    write /proc/sys/net/ipv4/fwmark_reflect 1
+     write /proc/sys/net/ipv6/fwmark_reflect 1
+ 
+     # set fwmark on accepted sockets
+-    write /proc/sys/net/ipv4/tcp_fwmark_accept 1
+ 
+     # disable icmp redirects
+     write /proc/sys/net/ipv4/conf/all/accept_redirects 0
+@@ -218,9 +201,6 @@ on init
      chown system log /sys/fs/pstore/pmsg-ramoops-0
      chmod 0440 /sys/fs/pstore/pmsg-ramoops-0
  
@@ -46,7 +252,7 @@ index 7dc9e55..c629ef6 100644
      # Linux's execveat() syscall may construct paths containing /dev/fd
      # expecting it to point to /proc/self/fd
      symlink /proc/self/fd /dev/fd
-@@ -342,7 +325,6 @@ on post-fs-data
+@@ -342,7 +322,6 @@ on post-fs-data
  
      # start debuggerd to make debugging early-boot crashes easier.
      start debuggerd
@@ -54,7 +260,31 @@ index 7dc9e55..c629ef6 100644
  
      # Make sure we have the device encryption key.
      start vold
-@@ -574,9 +556,7 @@ on boot
+@@ -474,15 +453,6 @@ on post-fs-data
+     # Set SELinux security contexts on upgrade or policy update.
+     restorecon_recursive /data
+ 
+-    # Check any timezone data in /data is newer than the copy in /system, delete if not.
+-    exec - system system -- /system/bin/tzdatacheck /system/usr/share/zoneinfo /data/misc/zoneinfo
+-
+-    # If there is no fs-post-data action in the init.<device>.rc file, you
+-    # must uncomment this line, otherwise encrypted filesystems
+-    # won't work.
+-    # Set indication (checked by vold) that we have finished this action
+-    #setprop vold.post_fs_data_done 1
+-
+ on boot
+     # basic network init
+     ifup lo
+@@ -493,7 +463,6 @@ on boot
+     # level system server to be able to adjust the kernel OOM driver
+     # parameters to match how it is managing things.
+     write /proc/sys/vm/overcommit_memory 1
+-    write /proc/sys/vm/min_free_order_shift 4
+     chown root system /sys/module/lowmemorykiller/parameters/adj
+     chmod 0664 /sys/module/lowmemorykiller/parameters/adj
+     chown root system /sys/module/lowmemorykiller/parameters/minfree
+@@ -574,9 +543,7 @@ on boot
  
  on nonencrypted
      # A/B update verifier that marks a successful boot.
@@ -64,7 +294,7 @@ index 7dc9e55..c629ef6 100644
  
  on property:sys.init_log_level=*
      loglevel ${sys.init_log_level}
-@@ -597,12 +577,10 @@ on property:vold.decrypt=trigger_post_fs_data
+@@ -597,12 +564,10 @@ on property:vold.decrypt=trigger_post_fs_data
  
  on property:vold.decrypt=trigger_restart_min_framework
      # A/B update verifier that marks a successful boot.
@@ -77,7 +307,20 @@ index 7dc9e55..c629ef6 100644
      class_start main
      class_start late_start
  
-@@ -643,7 +621,7 @@ service healthd /sbin/healthd
+@@ -623,12 +588,6 @@ on property:sys.sysctl.extra_free_kbytes=*
+ on property:sys.sysctl.tcp_def_init_rwnd=*
+     write /proc/sys/net/ipv4/tcp_default_init_rwnd ${sys.sysctl.tcp_def_init_rwnd}
+ 
+-on property:security.perf_harden=0
+-    write /proc/sys/kernel/perf_event_paranoid 1
+-
+-on property:security.perf_harden=1
+-    write /proc/sys/kernel/perf_event_paranoid 3
+-
+ ## Daemon processes to be run by init.
+ ##
+ service ueventd /sbin/ueventd
+@@ -643,7 +602,7 @@ service healthd /sbin/healthd
      group root system wakelock
  
  service console /system/bin/sh
@@ -86,7 +329,7 @@ index 7dc9e55..c629ef6 100644
      console
      disabled
      user shell
-@@ -655,7 +633,3 @@ on property:ro.debuggable=1
+@@ -655,7 +614,3 @@ on property:ro.debuggable=1
      # The folder is used to store method traces.
      chmod 0773 /data/misc/trace
      start console
@@ -94,3 +337,15 @@ index 7dc9e55..c629ef6 100644
 -service flash_recovery /system/bin/install-recovery.sh
 -    class main
 -    oneshot
+diff --git rootdir/init.zygote32.rc rootdir/init.zygote32.rc
+index b41af92..57bf7ef 100644
+--- rootdir/init.zygote32.rc
++++ rootdir/init.zygote32.rc
+@@ -1,5 +1,6 @@
+ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
+-    class main
++    class core
++    ioprio rt 1
+     socket zygote stream 660 root system
+     onrestart write /sys/android_power/request_state wake
+     onrestart write /sys/power/state on
