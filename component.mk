@@ -877,10 +877,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     StorageManager \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     Telecom \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     TeleService \
 
 # PRODUCT_PACKAGES += \
