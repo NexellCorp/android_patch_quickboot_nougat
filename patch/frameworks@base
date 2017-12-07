@@ -1,3 +1,175 @@
+diff --git cmds/app_process/app_main.cpp cmds/app_process/app_main.cpp
+index 2e02382..11b6ad2 100644
+--- cmds/app_process/app_main.cpp
++++ cmds/app_process/app_main.cpp
+@@ -185,6 +185,12 @@ static const char ZYGOTE_NICE_NAME[] = "zygote";
+ 
+ int main(int argc, char* const argv[])
+ {
++    ALOGD(">>>>>>>>> app_process start!!!");
++	// struct sched_param sched_param = {
++	// 	.sched_priority = 1,
++	// };
++	// sched_setscheduler(0, SCHED_FIFO, &sched_param);
++
+     if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+         // Older kernels don't understand PR_SET_NO_NEW_PRIVS and return
+         // EINVAL. Don't die on such kernels.
+@@ -304,6 +310,7 @@ int main(int argc, char* const argv[])
+     }
+ 
+     if (zygote) {
++		ALOGD("Start com.android.internal.os.ZygoteInit");
+         runtime.start("com.android.internal.os.ZygoteInit", args, zygote);
+     } else if (className) {
+         runtime.start("com.android.internal.os.RuntimeInit", args, zygote);
+diff --git core/java/android/app/ActivityManagerNative.java core/java/android/app/ActivityManagerNative.java
+index 50479c8..492d2a5 100644
+--- core/java/android/app/ActivityManagerNative.java
++++ core/java/android/app/ActivityManagerNative.java
+@@ -2749,6 +2749,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
+             return true;
+         }
+ 
++	case START_OTHER_APPS: {
++            data.enforceInterface(IActivityManager.descriptor);
++            startOtherApps();
++            reply.writeNoException();
++            return true;
++	}
++
+         case NOTIFY_CLEARTEXT_NETWORK_TRANSACTION: {
+             data.enforceInterface(IActivityManager.descriptor);
+             final int uid = data.readInt();
+@@ -7114,5 +7121,16 @@ class ActivityManagerProxy implements IActivityManager
+         return result != 0;
+     }
+ 
++    @Override
++    public void startOtherApps() throws RemoteException {
++        Parcel data = Parcel.obtain();
++        Parcel reply = Parcel.obtain();
++        data.writeInterfaceToken(IActivityManager.descriptor);
++        mRemote.transact(START_OTHER_APPS, data, reply, 0);
++        reply.readException();
++        data.recycle();
++        reply.recycle();
++    }
++
+     private IBinder mRemote;
+ }
+diff --git core/java/android/app/IActivityManager.java core/java/android/app/IActivityManager.java
+index 5a4470b..5c6e7c5 100644
+--- core/java/android/app/IActivityManager.java
++++ core/java/android/app/IActivityManager.java
+@@ -683,6 +683,12 @@ public interface IActivityManager extends IInterface {
+      */
+     public boolean canBypassWorkChallenge(PendingIntent intent) throws RemoteException;
+ 
++    /**
++     * Add for Nexell Quickboot
++     * @throws RemoteException
++     */
++    public void startOtherApps() throws RemoteException;
++
+     /*
+      * Private non-Binder interfaces
+      */
+@@ -1075,4 +1081,7 @@ public interface IActivityManager extends IInterface {
+     int SET_RENDER_THREAD_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 378;
+     int SET_HAS_TOP_UI = IBinder.FIRST_CALL_TRANSACTION + 379;
+     int CAN_BYPASS_WORK_CHALLENGE = IBinder.FIRST_CALL_TRANSACTION + 380;
++
++    // Nexell Quickboot
++    int START_OTHER_APPS = IBinder.FIRST_CALL_TRANSACTION + 400;
+ }
+diff --git core/java/android/os/Trace.java core/java/android/os/Trace.java
+index 3ae28fd..15c4942 100644
+--- core/java/android/os/Trace.java
++++ core/java/android/os/Trace.java
+@@ -210,9 +210,9 @@ public final class Trace {
+      * @hide
+      */
+     public static void traceBegin(long traceTag, String methodName) {
+-        if (isTagEnabled(traceTag)) {
+-            nativeTraceBegin(traceTag, methodName);
+-        }
++        // if (isTagEnabled(traceTag)) {
++        //     nativeTraceBegin(traceTag, methodName);
++        // }
+     }
+ 
+     /**
+@@ -224,9 +224,9 @@ public final class Trace {
+      * @hide
+      */
+     public static void traceEnd(long traceTag) {
+-        if (isTagEnabled(traceTag)) {
+-            nativeTraceEnd(traceTag);
+-        }
++        // if (isTagEnabled(traceTag)) {
++        //     nativeTraceEnd(traceTag);
++        // }
+     }
+ 
+     /**
+@@ -243,9 +243,9 @@ public final class Trace {
+      * @hide
+      */
+     public static void asyncTraceBegin(long traceTag, String methodName, int cookie) {
+-        if (isTagEnabled(traceTag)) {
+-            nativeAsyncTraceBegin(traceTag, methodName, cookie);
+-        }
++        // if (isTagEnabled(traceTag)) {
++        //     nativeAsyncTraceBegin(traceTag, methodName, cookie);
++        // }
+     }
+ 
+     /**
+@@ -260,9 +260,9 @@ public final class Trace {
+      * @hide
+      */
+     public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
+-        if (isTagEnabled(traceTag)) {
+-            nativeAsyncTraceEnd(traceTag, methodName, cookie);
+-        }
++        // if (isTagEnabled(traceTag)) {
++        //     nativeAsyncTraceEnd(traceTag, methodName, cookie);
++        // }
+     }
+ 
+     /**
+@@ -277,12 +277,12 @@ public final class Trace {
+      * most 127 Unicode code units long.
+      */
+     public static void beginSection(String sectionName) {
+-        if (isTagEnabled(TRACE_TAG_APP)) {
+-            if (sectionName.length() > MAX_SECTION_NAME_LEN) {
+-                throw new IllegalArgumentException("sectionName is too long");
+-            }
+-            nativeTraceBegin(TRACE_TAG_APP, sectionName);
+-        }
++        // if (isTagEnabled(TRACE_TAG_APP)) {
++        //     if (sectionName.length() > MAX_SECTION_NAME_LEN) {
++        //         throw new IllegalArgumentException("sectionName is too long");
++        //     }
++        //     nativeTraceBegin(TRACE_TAG_APP, sectionName);
++        // }
+     }
+ 
+     /**
+@@ -293,8 +293,8 @@ public final class Trace {
+      * thread.
+      */
+     public static void endSection() {
+-        if (isTagEnabled(TRACE_TAG_APP)) {
+-            nativeTraceEnd(TRACE_TAG_APP);
+-        }
++        // if (isTagEnabled(TRACE_TAG_APP)) {
++        //     nativeTraceEnd(TRACE_TAG_APP);
++        // }
+     }
+ }
 diff --git core/java/android/os/UserManager.java core/java/android/os/UserManager.java
 index 85b010a..d1d85fd 100644
 --- core/java/android/os/UserManager.java
@@ -44,6 +216,123 @@ index c5507b9..b45e065 100644
      }
  
      /**
+diff --git core/java/android/util/EventLog.java core/java/android/util/EventLog.java
+index 6196a97..c2cdd88 100644
+--- core/java/android/util/EventLog.java
++++ core/java/android/util/EventLog.java
+@@ -183,7 +183,10 @@ public class EventLog {
+      * @param value A value to log
+      * @return The number of bytes written
+      */
+-    public static native int writeEvent(int tag, int value);
++    // public static native int writeEvent(int tag, int value);
++    public static int writeEvent(int tag, int value) {
++	    return 0;
++    }
+ 
+     /**
+      * Record an event log message.
+@@ -191,7 +194,10 @@ public class EventLog {
+      * @param value A value to log
+      * @return The number of bytes written
+      */
+-    public static native int writeEvent(int tag, long value);
++    // public static native int writeEvent(int tag, long value);
++    public static int writeEvent(int tag, long value) {
++		return 0;
++	}
+ 
+     /**
+      * Record an event log message.
+@@ -199,7 +205,10 @@ public class EventLog {
+      * @param value A value to log
+      * @return The number of bytes written
+      */
+-    public static native int writeEvent(int tag, float value);
++    // public static native int writeEvent(int tag, float value);
++    public static int writeEvent(int tag, float value) {
++		return 0;
++	}
+ 
+     /**
+      * Record an event log message.
+@@ -207,7 +216,10 @@ public class EventLog {
+      * @param str A value to log
+      * @return The number of bytes written
+      */
+-    public static native int writeEvent(int tag, String str);
++    // public static native int writeEvent(int tag, String str);
++    public static int writeEvent(int tag, String str) {
++		return 0;
++	}
+ 
+     /**
+      * Record an event log message.
+@@ -215,7 +227,10 @@ public class EventLog {
+      * @param list A list of values to log
+      * @return The number of bytes written
+      */
+-    public static native int writeEvent(int tag, Object... list);
++    // public static native int writeEvent(int tag, Object... list);
++    public static int writeEvent(int tag, Object... list) {
++		return 0;
++	}
+ 
+     /**
+      * Read events from the log, filtered by type.
+diff --git core/java/com/android/internal/os/ZygoteInit.java core/java/com/android/internal/os/ZygoteInit.java
+index e4f573b..e7377be 100644
+--- core/java/com/android/internal/os/ZygoteInit.java
++++ core/java/com/android/internal/os/ZygoteInit.java
+@@ -497,9 +497,9 @@ public class ZygoteInit {
+         /* runFinalizationSync() lets finalizers be called in Zygote,
+          * which doesn't have a HeapWorker thread.
+          */
+-        System.gc();
++        // System.gc();
+         runtime.runFinalizationSync();
+-        System.gc();
++        // System.gc();
+     }
+ 
+     /**
+diff --git core/jni/android_util_EventLog.cpp core/jni/android_util_EventLog.cpp
+index 4f8a2cb..156c0a0 100644
+--- core/jni/android_util_EventLog.cpp
++++ core/jni/android_util_EventLog.cpp
+@@ -49,6 +49,7 @@ static jclass gStringClass;
+  * In class android.util.EventLog:
+  *  static native int writeEvent(int tag, int value)
+  */
++#if 0
+ static jint android_util_EventLog_writeEvent_Integer(JNIEnv* env UNUSED,
+                                                      jobject clazz UNUSED,
+                                                      jint tag, jint value)
+@@ -162,6 +163,7 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
+     buf[pos++] = '\n';
+     return android_bWriteLog(tag, buf, pos);
+ }
++#endif
+ 
+ /*
+  * In class android.util.EventLog:
+@@ -251,6 +253,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
+  */
+ static const JNINativeMethod gRegisterMethods[] = {
+     /* name, signature, funcPtr */
++#if 0
+     { "writeEvent", "(II)I", (void*) android_util_EventLog_writeEvent_Integer },
+     { "writeEvent", "(IJ)I", (void*) android_util_EventLog_writeEvent_Long },
+     { "writeEvent", "(IF)I", (void*) android_util_EventLog_writeEvent_Float },
+@@ -262,6 +265,7 @@ static const JNINativeMethod gRegisterMethods[] = {
+       "(I[Ljava/lang/Object;)I",
+       (void*) android_util_EventLog_writeEvent_Array
+     },
++#endif
+     { "readEvents",
+       "([ILjava/util/Collection;)V",
+       (void*) android_util_EventLog_readEvents
+
 diff --git core/java/com/android/internal/widget/LockPatternUtils.java core/java/com/android/internal/widget/LockPatternUtils.java
 index d49d433..56353c7 100644
 --- core/java/com/android/internal/widget/LockPatternUtils.java
@@ -345,19 +634,63 @@ index df1b6f5..be04ecd 100644
                  mService.systemRunning(statusBarService);
              }
          }
+diff --git services/core/java/com/android/server/ServiceThread.java services/core/java/com/android/server/ServiceThread.java
+index bce64af..81ace5a 100644
+--- services/core/java/com/android/server/ServiceThread.java
++++ services/core/java/com/android/server/ServiceThread.java
+@@ -39,10 +39,10 @@ public class ServiceThread extends HandlerThread {
+         Process.setCanSelfBackground(false);
+ 
+         // For debug builds, log event loop stalls to dropbox for analysis.
+-        if (!mAllowIo && StrictMode.conditionallyEnableDebugLogging()) {
+-            Slog.i(TAG, "Enabled StrictMode logging for " + getName() + " looper.");
+-        }
++        // if (!mAllowIo && StrictMode.conditionallyEnableDebugLogging()) {
++        //     Slog.i(TAG, "Enabled StrictMode logging for " + getName() + " looper.");
++        // }
+ 
+         super.run();
+     }
+-}
+\ No newline at end of file
++}
 diff --git services/core/java/com/android/server/am/ActivityManagerService.java services/core/java/com/android/server/am/ActivityManagerService.java
-index 91c4571..b15e7b7 100644
+index 91c4571..1f7ad24 100644
 --- services/core/java/com/android/server/am/ActivityManagerService.java
 +++ services/core/java/com/android/server/am/ActivityManagerService.java
-@@ -13401,6 +13401,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+@@ -6866,7 +6866,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+                 Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+                 mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+                 // Tell anyone interested that we are done booting!
+-                SystemProperties.set("sys.boot_completed", "1");
++                // SystemProperties.set("sys.boot_completed", "1");
+ 
+                 // And trigger dev.bootcomplete if we are not showing encryption progress
+                 if (!"trigger_restart_min_framework".equals(SystemProperties.get("vold.decrypt"))
+@@ -11412,6 +11412,12 @@ public final class ActivityManagerService extends ActivityManagerNative
+         }
+     }
+ 
++	@Override
++	public void startOtherApps() throws RemoteException {
++		startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
++		startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
++	}
++
+     /**
+      * When a user is unlocked, we need to install encryption-unaware providers
+      * belonging to any running apps.
+@@ -13400,7 +13406,8 @@ public final class ActivityManagerService extends ActivityManagerNative
+         synchronized (this) {
              // Only start up encryption-aware persistent apps; once user is
              // unlocked we'll come back around and start unaware apps
-             startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
-+			startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+-            startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
++            // startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_AWARE);
++			// startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
  
              // Start up initial activity.
              mBooting = true;
-@@ -13415,6 +13416,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+@@ -13415,6 +13422,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                      throw e.rethrowAsRuntimeException();
                  }
              }
@@ -379,7 +712,7 @@ index 4fd26b3..724be37 100644
      // Amount of time we wait for observers to handle a user switch before
      // giving up on them and unfreezing the screen.
 diff --git services/core/java/com/android/server/wm/WindowManagerService.java services/core/java/com/android/server/wm/WindowManagerService.java
-index ca2610a..1ff417a 100644
+index ca2610a..b106450 100644
 --- services/core/java/com/android/server/wm/WindowManagerService.java
 +++ services/core/java/com/android/server/wm/WindowManagerService.java
 @@ -5908,6 +5908,7 @@ public class WindowManagerService extends IWindowManager.Stub
@@ -399,7 +732,7 @@ index ca2610a..1ff417a 100644
      }
  
      @Override
-@@ -5958,14 +5961,24 @@ public class WindowManagerService extends IWindowManager.Stub
+@@ -5958,14 +5961,29 @@ public class WindowManagerService extends IWindowManager.Stub
      }
  
      public void performBootTimeout() {
@@ -428,11 +761,16 @@ index ca2610a..1ff417a 100644
 +				Slog.e(TAG_WM, "Boot completed: SurfaceFlinger is dead!");
 +			}
 +			mBootAnimationStopped = true;
++			SystemProperties.set("sys.boot_completed", "1");
++			try {
++				mActivityManager.startOtherApps();
++			} catch (RemoteException e) {
++			}
 +		}
      }
  
      private boolean checkWaitingForWindowsLocked() {
-@@ -6045,30 +6058,6 @@ public class WindowManagerService extends IWindowManager.Stub
+@@ -6045,30 +6063,6 @@ public class WindowManagerService extends IWindowManager.Stub
                  return;
              }
  
@@ -463,6 +801,56 @@ index ca2610a..1ff417a 100644
              EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
              Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
              mDisplayEnabled = true;
+diff --git services/core/jni/com_android_server_power_PowerManagerService.cpp services/core/jni/com_android_server_power_PowerManagerService.cpp
+index cbbfda6..8fb431a 100644
+--- services/core/jni/com_android_server_power_PowerManagerService.cpp
++++ services/core/jni/com_android_server_power_PowerManagerService.cpp
+@@ -134,6 +134,7 @@ static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean
+     }
+ }
+ 
++#if 0
+ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
+     if (enable) {
+         ALOGD_IF_SLOW(100, "Excessive delay in autosuspend_enable() while turning screen off");
+@@ -143,6 +144,10 @@ static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean
+         autosuspend_disable();
+     }
+ }
++#else
++static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean /* enable */) {
++}
++#endif
+ 
+ static void nativeSendPowerHint(JNIEnv *env, jclass clazz, jint hintId, jint data) {
+     int data_param = data;
+diff --git services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+index e3b6ecc..9bedfa4 100644
+--- services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
++++ services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+@@ -9236,7 +9236,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
+         ensureDeviceOwnerManagingSingleUser(admin);
+ 
+         List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
+-        return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
++		if (logs != null) {
++			List<SecurityEvent> myLogs = new ArrayList<SecurityEvent>();;
++			for (int i = 0; i < logs.size(); i++) {
++				SecurityEvent event = logs.get(i);
++				long currentTimestampNanos = event.getTimeNanos();
++				Slog.d(LOG_TAG, i + "th log t --> " + currentTimestampNanos);
++				if ((event.getTimeNanos() / (1000*1000*1000)) > 1000000000)
++					myLogs.add(event);
++			}
++
++			return new ParceledListSlice<SecurityEvent>(myLogs);
++		} else {
++			return null;
++		}
+     }
+ 
+     private void enforceCanManageDeviceAdmin() {
+
 diff --git packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java packages/SystemUI/src/com/android/systemui/statusbar/avn/AVNStatusBar.java
 new file mode 100644
 index 0000000..450a946
@@ -871,3 +1259,47 @@ index 889c52a..5d01954 100644
                  mKeyguardDelegate.onScreenTurningOn(mKeyguardDrawnCallback);
              } else {
                  if (DEBUG_WAKEUP) Slog.d(TAG,
+diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
+index 653c5e9..3e9e6e8 100644
+--- services/java/com/android/server/SystemServer.java
++++ services/java/com/android/server/SystemServer.java
+@@ -272,16 +272,16 @@ public final class SystemServer {
+             SystemProperties.set("persist.sys.dalvik.vm.lib.2", VMRuntime.getRuntime().vmLibrary());
+ 
+             // Enable the sampling profiler.
+-            if (SamplingProfilerIntegration.isEnabled()) {
+-                SamplingProfilerIntegration.start();
+-                mProfilerSnapshotTimer = new Timer();
+-                mProfilerSnapshotTimer.schedule(new TimerTask() {
+-                        @Override
+-                        public void run() {
+-                            SamplingProfilerIntegration.writeSnapshot("system_server", null);
+-                        }
+-                    }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
+-            }
++            // if (SamplingProfilerIntegration.isEnabled()) {
++            //     SamplingProfilerIntegration.start();
++            //     mProfilerSnapshotTimer = new Timer();
++            //     mProfilerSnapshotTimer.schedule(new TimerTask() {
++            //             @Override
++            //             public void run() {
++            //                 SamplingProfilerIntegration.writeSnapshot("system_server", null);
++            //             }
++            //         }, SNAPSHOT_INTERVAL, SNAPSHOT_INTERVAL);
++            // }
+ 
+             // Mmmmmm... more memory!
+             VMRuntime.getRuntime().clearGrowthLimit();
+@@ -347,9 +347,9 @@ public final class SystemServer {
+         }
+ 
+         // For debug builds, log event loop stalls to dropbox for analysis.
+-        if (StrictMode.conditionallyEnableDebugLogging()) {
+-            Slog.i(TAG, "Enabled StrictMode for system server main thread.");
+-        }
++        // if (StrictMode.conditionallyEnableDebugLogging()) {
++        //     Slog.i(TAG, "Enabled StrictMode for system server main thread.");
++        // }
+ 
+         // Loop forever.
+         Looper.loop();
