@@ -1,0 +1,36 @@
+diff --git cmds/servicemanager/service_manager.c cmds/servicemanager/service_manager.c
+index 68e3ceb..4c8e47d 100644
+--- cmds/servicemanager/service_manager.c
++++ cmds/servicemanager/service_manager.c
+@@ -372,6 +372,10 @@ static int audit_callback(void *data, __unused security_class_t cls, char *buf,
+ int main()
+ {
+     struct binder_state *bs;
++	struct sched_param param = {
++		.sched_priority = 1,
++	};
++	sched_setscheduler(0, SCHED_FIFO, &param);
+ 
+     bs = binder_open(128*1024);
+     if (!bs) {
+diff --git services/surfaceflinger/main_surfaceflinger.cpp services/surfaceflinger/main_surfaceflinger.cpp
+index 53a63bd..2967db6 100644
+--- services/surfaceflinger/main_surfaceflinger.cpp
++++ services/surfaceflinger/main_surfaceflinger.cpp
+@@ -41,9 +41,16 @@ int main(int, char**) {
+     // instantiate surfaceflinger
+     sp<SurfaceFlinger> flinger = new SurfaceFlinger();
+ 
++#if 0
+     setpriority(PRIO_PROCESS, 0, PRIORITY_URGENT_DISPLAY);
+ 
+     set_sched_policy(0, SP_FOREGROUND);
++#else
++    struct sched_param sched_param = {
++	    .sched_priority = 1,
++    };
++    sched_setscheduler(0, SCHED_FIFO, &sched_param);
++#endif
+ 
+ #ifdef ENABLE_CPUSETS
+     // Put most SurfaceFlinger threads in the system-background cpuset
