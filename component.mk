@@ -377,8 +377,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # frameworks/base/data/fonts/fonts.mk
 # $(call inherit-product-if-exists, frameworks/base/data/fonts/fonts.mk)
-PRODUCT_COPY_FILES += \
+# PRODUCT_COPY_FILES += \
     frameworks/base/data/fonts/fonts.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/fonts.xml
+PRODUCT_COPY_FILES += \
+    device/nexell/quickboot/fonts.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/fonts.xml
 
 PRODUCT_PACKAGES += \
     DroidSansFallback.ttf \
