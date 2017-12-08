@@ -347,6 +347,21 @@ index d49d433..56353c7 100644
      }
  
      /**
+diff --git data/etc/platform.xml data/etc/platform.xml
+index 627f360..9f847e5 100644
+--- data/etc/platform.xml
++++ data/etc/platform.xml
+@@ -165,8 +165,8 @@
+             file="/system/framework/android.test.runner.jar" />
+     <library name="javax.obex"
+             file="/system/framework/javax.obex.jar" />
+-    <library name="org.apache.http.legacy"
+-            file="/system/framework/org.apache.http.legacy.jar" />
++    <!-- <library name="org.apache.http.legacy" -->
++    <!--         file="/system/framework/org.apache.http.legacy.jar" /> -->
+ 
+     <!-- These are the standard packages that are white-listed to always have internet
+          access while in power save mode, even if they aren't in the foreground. -->
 diff --git packages/SystemUI/proguard.flags packages/SystemUI/proguard.flags
 index d0c2d29..cae67cd 100644
 --- packages/SystemUI/proguard.flags
@@ -655,7 +670,7 @@ index bce64af..81ace5a 100644
 \ No newline at end of file
 +}
 diff --git services/core/java/com/android/server/am/ActivityManagerService.java services/core/java/com/android/server/am/ActivityManagerService.java
-index 91c4571..1f7ad24 100644
+index 91c4571..5a32e12 100644
 --- services/core/java/com/android/server/am/ActivityManagerService.java
 +++ services/core/java/com/android/server/am/ActivityManagerService.java
 @@ -6866,7 +6866,7 @@ public final class ActivityManagerService extends ActivityManagerNative
@@ -680,7 +695,16 @@ index 91c4571..1f7ad24 100644
      /**
       * When a user is unlocked, we need to install encryption-unaware providers
       * belonging to any running apps.
-@@ -13400,7 +13406,8 @@ public final class ActivityManagerService extends ActivityManagerNative
+@@ -13304,6 +13310,8 @@ public final class ActivityManagerService extends ActivityManagerNative
+                 return;
+             }
+ 
++	     SystemProperties.set("ctl.start", "mcuserver");
++
+             mLocalDeviceIdleController
+                     = LocalServices.getService(DeviceIdleController.LocalService.class);
+ 
+@@ -13400,7 +13408,8 @@ public final class ActivityManagerService extends ActivityManagerNative
          synchronized (this) {
              // Only start up encryption-aware persistent apps; once user is
              // unlocked we'll come back around and start unaware apps
@@ -690,14 +714,16 @@ index 91c4571..1f7ad24 100644
  
              // Start up initial activity.
              mBooting = true;
-@@ -13415,6 +13422,7 @@ public final class ActivityManagerService extends ActivityManagerNative
+@@ -13415,7 +13424,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                      throw e.rethrowAsRuntimeException();
                  }
              }
 +			ensureBootCompleted();
              startHomeActivityLocked(currentUserId, "systemReady");
++			// SystemProperties.set("ctl.start", "mcuserver");
  
              try {
+                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
 diff --git services/core/java/com/android/server/am/UserController.java services/core/java/com/android/server/am/UserController.java
 index 4fd26b3..724be37 100644
 --- services/core/java/com/android/server/am/UserController.java
