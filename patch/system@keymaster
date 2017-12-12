@@ -1,0 +1,15 @@
+diff --git soft_keymaster_device.cpp soft_keymaster_device.cpp
+index eddbc5d..a98c205 100644
+--- soft_keymaster_device.cpp
++++ soft_keymaster_device.cpp
+@@ -128,8 +128,8 @@ SoftKeymasterDevice::SoftKeymasterDevice()
+     : wrapped_km0_device_(nullptr), wrapped_km1_device_(nullptr),
+       context_(new SoftKeymasterContext),
+       impl_(new AndroidKeymaster(context_, kOperationTableSize)), configured_(false) {
+-    LOG_I("Creating device", 0);
+-    LOG_D("Device address: %p", this);
++    // LOG_I("Creating device", 0);
++    // LOG_D("Device address: %p", this);
+ 
+     initialize_device_struct(KEYMASTER_SOFTWARE_ONLY | KEYMASTER_BLOBS_ARE_STANDALONE |
+                              KEYMASTER_SUPPORTS_EC);
