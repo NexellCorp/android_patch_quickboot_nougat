@@ -128,7 +128,7 @@ index cd2d2e6..11755a4 100644
      // Don't mount filesystems or start core system services in charger mode.
      std::string bootmode = property_get("ro.bootmode");
 diff --git init/service.cpp init/service.cpp
-index 3149f8e..d96daec 100644
+index 3149f8e..1c4b9f6 100644
 --- init/service.cpp
 +++ init/service.cpp
 @@ -22,6 +22,7 @@
@@ -166,6 +166,15 @@ index 3149f8e..d96daec 100644
          return false;
      }
  
+@@ -793,7 +805,7 @@ bool ServiceManager::ReapOneProcess() {
+     }
+ 
+     if (WIFEXITED(status)) {
+-        NOTICE("%s exited with status %d\n", name.c_str(), WEXITSTATUS(status));
++        ERROR("\n%s exited with status %d\n", name.c_str(), WEXITSTATUS(status));
+     } else if (WIFSIGNALED(status)) {
+         NOTICE("%s killed by signal %d\n", name.c_str(), WTERMSIG(status));
+     } else if (WIFSTOPPED(status)) {
 diff --git libcutils/trace-dev.c libcutils/trace-dev.c
 index 778e4f0..a511d3d 100644
 --- libcutils/trace-dev.c
@@ -189,7 +198,7 @@ index 778e4f0..a511d3d 100644
  }
  
 diff --git rootdir/init.rc rootdir/init.rc
-index 7dc9e55..aad8a8d 100644
+index 7dc9e55..82a1d6b 100644
 --- rootdir/init.rc
 +++ rootdir/init.rc
 @@ -14,23 +14,12 @@ on early-init
@@ -252,7 +261,15 @@ index 7dc9e55..aad8a8d 100644
      # Linux's execveat() syscall may construct paths containing /dev/fd
      # expecting it to point to /proc/self/fd
      symlink /proc/self/fd /dev/fd
-@@ -342,7 +322,6 @@ on post-fs-data
+@@ -243,7 +223,6 @@ on load_system_props_action
+ on load_persist_props_action
+     load_persist_props
+     start logd
+-    start logd-reinit
+ 
+ # Indicate to fw loaders that the relevant mounts are up.
+ on firmware_mounts_complete
+@@ -342,7 +321,6 @@ on post-fs-data
  
      # start debuggerd to make debugging early-boot crashes easier.
      start debuggerd
@@ -260,7 +277,7 @@ index 7dc9e55..aad8a8d 100644
  
      # Make sure we have the device encryption key.
      start vold
-@@ -474,15 +453,6 @@ on post-fs-data
+@@ -474,15 +452,6 @@ on post-fs-data
      # Set SELinux security contexts on upgrade or policy update.
      restorecon_recursive /data
  
@@ -276,7 +293,7 @@ index 7dc9e55..aad8a8d 100644
  on boot
      # basic network init
      ifup lo
-@@ -493,7 +463,6 @@ on boot
+@@ -493,7 +462,6 @@ on boot
      # level system server to be able to adjust the kernel OOM driver
      # parameters to match how it is managing things.
      write /proc/sys/vm/overcommit_memory 1
@@ -284,7 +301,7 @@ index 7dc9e55..aad8a8d 100644
      chown root system /sys/module/lowmemorykiller/parameters/adj
      chmod 0664 /sys/module/lowmemorykiller/parameters/adj
      chown root system /sys/module/lowmemorykiller/parameters/minfree
-@@ -574,9 +543,7 @@ on boot
+@@ -574,9 +542,7 @@ on boot
  
  on nonencrypted
      # A/B update verifier that marks a successful boot.
@@ -294,7 +311,14 @@ index 7dc9e55..aad8a8d 100644
  
  on property:sys.init_log_level=*
      loglevel ${sys.init_log_level}
-@@ -597,12 +564,10 @@ on property:vold.decrypt=trigger_post_fs_data
+@@ -590,19 +556,16 @@ on property:vold.decrypt=trigger_reset_main
+ on property:vold.decrypt=trigger_load_persist_props
+     load_persist_props
+     start logd
+-    start logd-reinit
+ 
+ on property:vold.decrypt=trigger_post_fs_data
+     trigger post-fs-data
  
  on property:vold.decrypt=trigger_restart_min_framework
      # A/B update verifier that marks a successful boot.
@@ -307,7 +331,7 @@ index 7dc9e55..aad8a8d 100644
      class_start main
      class_start late_start
  
-@@ -623,12 +588,6 @@ on property:sys.sysctl.extra_free_kbytes=*
+@@ -623,12 +586,6 @@ on property:sys.sysctl.extra_free_kbytes=*
  on property:sys.sysctl.tcp_def_init_rwnd=*
      write /proc/sys/net/ipv4/tcp_default_init_rwnd ${sys.sysctl.tcp_def_init_rwnd}
  
@@ -320,7 +344,7 @@ index 7dc9e55..aad8a8d 100644
  ## Daemon processes to be run by init.
  ##
  service ueventd /sbin/ueventd
-@@ -643,7 +602,7 @@ service healthd /sbin/healthd
+@@ -643,7 +600,7 @@ service healthd /sbin/healthd
      group root system wakelock
  
  service console /system/bin/sh
@@ -329,7 +353,7 @@ index 7dc9e55..aad8a8d 100644
      console
      disabled
      user shell
-@@ -655,7 +614,3 @@ on property:ro.debuggable=1
+@@ -655,7 +612,3 @@ on property:ro.debuggable=1
      # The folder is used to store method traces.
      chmod 0773 /data/misc/trace
      start console
