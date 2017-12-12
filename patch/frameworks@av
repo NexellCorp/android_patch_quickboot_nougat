@@ -32,6 +32,29 @@ index f6c325c..3a1c4d6 100644
      user media
      group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm
      ioprio rt 4
+diff --git media/utils/BatteryNotifier.cpp media/utils/BatteryNotifier.cpp
+index 341d391..810ac63 100644
+--- media/utils/BatteryNotifier.cpp
++++ media/utils/BatteryNotifier.cpp
+@@ -184,6 +184,8 @@ void BatteryNotifier::onBatteryStatServiceDied() {
+ }
+ 
+ sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
++	// psw0523 for zh quickboot
++#if 0
+     if (mBatteryStatService != nullptr) {
+         return mBatteryStatService;
+     }
+@@ -214,6 +216,9 @@ sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
+         // TODO: Notify for camera and flashlight state as well?
+     }
+     return mBatteryStatService;
++#else
++	return nullptr;
++#endif
+ }
+ 
+ ANDROID_SINGLETON_STATIC_INSTANCE(BatteryNotifier);
 diff --git services/mediacodec/mediacodec.rc services/mediacodec/mediacodec.rc
 index d78e0a4..41e6212 100644
 --- services/mediacodec/mediacodec.rc
@@ -54,3 +77,45 @@ index 5fc2941..20f2521 100644
      user mediaex
      group drmrpc mediadrm
      ioprio rt 4
+diff --git services/radio/RadioService.cpp services/radio/RadioService.cpp
+index 5a3f750..bd8a5bc 100644
+--- services/radio/RadioService.cpp
++++ services/radio/RadioService.cpp
+@@ -51,6 +51,8 @@ RadioService::RadioService()
+ 
+ void RadioService::onFirstRef()
+ {
++    // this patch is for zh_blackdragon
++#if 0
+     const hw_module_t *mod;
+     int rc;
+     struct radio_hw_device *dev;
+@@ -90,6 +92,7 @@ void RadioService::onFirstRef()
+     convertProperties(&properties, &halProperties);
+     sp<Module> module = new Module(dev, properties);
+     mModules.add(properties.handle, module);
++#endif
+ }
+ 
+ RadioService::~RadioService()
+diff --git services/soundtrigger/SoundTriggerHwService.cpp services/soundtrigger/SoundTriggerHwService.cpp
+index eebc487..e45dbf3 100644
+--- services/soundtrigger/SoundTriggerHwService.cpp
++++ services/soundtrigger/SoundTriggerHwService.cpp
+@@ -54,6 +54,8 @@ SoundTriggerHwService::SoundTriggerHwService()
+ 
+ void SoundTriggerHwService::onFirstRef()
+ {
++	// patch for zh_blackdragon
++#if 0
+     const hw_module_t *mod;
+     int rc;
+     sound_trigger_hw_device *dev;
+@@ -91,6 +93,7 @@ void SoundTriggerHwService::onFirstRef()
+     sp<Module> module = new Module(this, dev, descriptor, client);
+     mModules.add(descriptor.handle, module);
+     mCallbackThread = new CallbackThread(this);
++#endif
+ }
+ 
+ SoundTriggerHwService::~SoundTriggerHwService()
