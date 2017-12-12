@@ -1,0 +1,12 @@
+diff --git AndroidManifest.xml AndroidManifest.xml
+index 56ac884..03291ae 100644
+--- AndroidManifest.xml
++++ AndroidManifest.xml
+@@ -8,7 +8,6 @@
+     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+     <uses-permission android:name="android.permission.MANAGE_USERS" />
+-    <uses-permission android:name="android.permission.ACCESS_ALL_DOWNLOADS" />
+ 
+     <application android:label="@string/app_name"
+                  android:allowBackup="false">
