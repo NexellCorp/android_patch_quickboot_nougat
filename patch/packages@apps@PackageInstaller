@@ -1,0 +1,13 @@
+diff --git AndroidManifest.xml AndroidManifest.xml
+index 654e5d1..76f189b 100644
+--- AndroidManifest.xml
++++ AndroidManifest.xml
+@@ -20,8 +20,6 @@
+     <uses-permission android:name="android.permission.KILL_UID" />
+     <uses-permission android:name="android.permission.MANAGE_APP_OPS_RESTRICTIONS" />
+ 
+-    <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
+-
+     <application android:label="@string/app_name"
+             android:allowBackup="false"
+             android:theme="@style/Theme.DialogWhenLarge"
