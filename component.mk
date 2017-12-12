@@ -988,7 +988,7 @@ PRODUCT_PACKAGES += \
 # PRODUCT_PACKAGES += \
     CtsShimPrivPrebuilt \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     DownloadProvider \
 
 PRODUCT_PACKAGES += \
