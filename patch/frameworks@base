@@ -1011,6 +1011,19 @@ index 8819c60..39db811 100644
      }
  
      @Override
+diff --git packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java
+index 25e9bb0..27fa6c0 100644
+--- packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java
++++ packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java
+@@ -156,7 +156,7 @@ public class StorageNotification extends SystemUI {
+         mNotificationManager = mContext.getSystemService(NotificationManager.class);
+ 
+         mStorageManager = mContext.getSystemService(StorageManager.class);
+-        mStorageManager.registerListener(mListener);
++        // mStorageManager.registerListener(mListener);
+ 
+         mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
+                 android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
 diff --git preloaded-classes preloaded-classes
 index fe2fba5..d691740 100644
 --- preloaded-classes
