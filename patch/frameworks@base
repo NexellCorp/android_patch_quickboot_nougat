@@ -83,6 +83,50 @@ index 5a4470b..5c6e7c5 100644
 +    // Nexell Quickboot
 +    int START_OTHER_APPS = IBinder.FIRST_CALL_TRANSACTION + 400;
  }
+diff --git core/java/android/app/KeyguardManager.java core/java/android/app/KeyguardManager.java
+index 1850ceb..7838106 100644
+--- core/java/android/app/KeyguardManager.java
++++ core/java/android/app/KeyguardManager.java
+@@ -300,12 +300,13 @@ public class KeyguardManager {
+      * @hide
+      */
+     public boolean isDeviceLocked(int userId) {
+-        ITrustManager trustManager = getTrustManager();
+-        try {
+-            return trustManager.isDeviceLocked(userId);
+-        } catch (RemoteException e) {
+-            return false;
+-        }
++        // ITrustManager trustManager = getTrustManager();
++        // try {
++        //     return trustManager.isDeviceLocked(userId);
++        // } catch (RemoteException e) {
++        //     return false;
++        // }
++	return false;
+     }
+ 
+     /**
+@@ -326,12 +327,13 @@ public class KeyguardManager {
+      * @hide
+      */
+     public boolean isDeviceSecure(int userId) {
+-        ITrustManager trustManager = getTrustManager();
+-        try {
+-            return trustManager.isDeviceSecure(userId);
+-        } catch (RemoteException e) {
+-            return false;
+-        }
++        // ITrustManager trustManager = getTrustManager();
++        // try {
++        //     return trustManager.isDeviceSecure(userId);
++        // } catch (RemoteException e) {
++        //     return false;
++        // }
++	return false;
+     }
+ 
+     private synchronized ITrustManager getTrustManager() {
 diff --git core/java/android/os/Trace.java core/java/android/os/Trace.java
 index 3ae28fd..15c4942 100644
 --- core/java/android/os/Trace.java
@@ -1057,6 +1101,69 @@ index df1b6f5..be04ecd 100644
                  mService.systemRunning(statusBarService);
              }
          }
+diff --git services/core/java/com/android/server/LocationManagerService.java services/core/java/com/android/server/LocationManagerService.java
+index c9b59ade..01bf5f1 100644
+--- services/core/java/com/android/server/LocationManagerService.java
++++ services/core/java/com/android/server/LocationManagerService.java
+@@ -1205,16 +1205,16 @@ public class LocationManagerService extends ILocationManager.Stub {
+     }
+ 
+     boolean checkLocationAccess(int pid, int uid, String packageName, int allowedResolutionLevel) {
+-        int op = resolutionLevelToOp(allowedResolutionLevel);
+-        if (op >= 0) {
+-            if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+-                return false;
+-            }
+-        }
+-
+-        if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
+-            return false;
+-        }
++        // int op = resolutionLevelToOp(allowedResolutionLevel);
++        // if (op >= 0) {
++        //     if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
++        //         return false;
++        //     }
++        // }
++        //
++        // if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
++        //     return false;
++        // }
+ 
+         return true;
+     }
+diff --git services/core/java/com/android/server/MountService.java services/core/java/com/android/server/MountService.java
+index 8430a0b..729c08a 100644
+--- services/core/java/com/android/server/MountService.java
++++ services/core/java/com/android/server/MountService.java
+@@ -2138,16 +2138,17 @@ class MountService extends IMountService.Stub
+     }
+ 
+     public String[] getSecureContainerList() {
+-        enforcePermission(android.Manifest.permission.ASEC_ACCESS);
+-        waitForReady();
+-        warnOnNotMounted();
+-
+-        try {
+-            return NativeDaemonEvent.filterMessageList(
+-                    mConnector.executeForList("asec", "list"), VoldResponseCode.AsecListResult);
+-        } catch (NativeDaemonConnectorException e) {
+-            return new String[0];
+-        }
++        // enforcePermission(android.Manifest.permission.ASEC_ACCESS);
++        // waitForReady();
++        // warnOnNotMounted();
++        //
++        // try {
++        //     return NativeDaemonEvent.filterMessageList(
++        //             mConnector.executeForList("asec", "list"), VoldResponseCode.AsecListResult);
++        // } catch (NativeDaemonConnectorException e) {
++        //     return new String[0];
++        // }
++        return new String[0];
+     }
+ 
+     public int createSecureContainer(String id, int sizeMb, String fstype, String key,
 diff --git services/core/java/com/android/server/ServiceThread.java services/core/java/com/android/server/ServiceThread.java
 index bce64af..81ace5a 100644
 --- services/core/java/com/android/server/ServiceThread.java
@@ -1576,7 +1683,7 @@ index 2ece99f..08671e2 100644
              throw new IllegalArgumentException(
                      "Exactly one of stageDir or stageCid stage must be set");
 diff --git services/core/java/com/android/server/pm/PackageManagerService.java services/core/java/com/android/server/pm/PackageManagerService.java
-index b6a9940..6eaa248 100644
+index b6a9940..436d567 100644
 --- services/core/java/com/android/server/pm/PackageManagerService.java
 +++ services/core/java/com/android/server/pm/PackageManagerService.java
 @@ -2506,28 +2506,29 @@ public class PackageManagerService extends IPackageManager.Stub {
@@ -1648,7 +1755,49 @@ index b6a9940..6eaa248 100644
                  best = cur;
              }
          }
-@@ -6668,7 +6674,7 @@ public class PackageManagerService extends IPackageManager.Stub {
+@@ -3719,23 +3725,24 @@ public class PackageManagerService extends IPackageManager.Stub {
+             return PackageManager.PERMISSION_DENIED;
+         }
+ 
+-        synchronized (mPackages) {
+-            final PackageParser.Package p = mPackages.get(pkgName);
+-            if (p != null && p.mExtras != null) {
+-                final PackageSetting ps = (PackageSetting) p.mExtras;
+-                final PermissionsState permissionsState = ps.getPermissionsState();
+-                if (permissionsState.hasPermission(permName, userId)) {
+-                    return PackageManager.PERMISSION_GRANTED;
+-                }
+-                // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
+-                if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
+-                        .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
+-                    return PackageManager.PERMISSION_GRANTED;
+-                }
+-            }
+-        }
+-
+-        return PackageManager.PERMISSION_DENIED;
++        // synchronized (mPackages) {
++        //     final PackageParser.Package p = mPackages.get(pkgName);
++        //     if (p != null && p.mExtras != null) {
++        //         final PackageSetting ps = (PackageSetting) p.mExtras;
++        //         final PermissionsState permissionsState = ps.getPermissionsState();
++        //         if (permissionsState.hasPermission(permName, userId)) {
++        //             return PackageManager.PERMISSION_GRANTED;
++        //         }
++        //         // Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION
++        //         if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) && permissionsState
++        //                 .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) {
++        //             return PackageManager.PERMISSION_GRANTED;
++        //         }
++        //     }
++        // }
++        //
++        // return PackageManager.PERMISSION_DENIED;
++	return PackageManager.PERMISSION_GRANTED;
+     }
+ 
+     @Override
+@@ -6668,7 +6675,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      private void scanDirLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
          final File[] files = dir.listFiles();
          if (ArrayUtils.isEmpty(files)) {
@@ -1657,7 +1806,7 @@ index b6a9940..6eaa248 100644
              return;
          }
  
-@@ -6688,7 +6694,7 @@ public class PackageManagerService extends IPackageManager.Stub {
+@@ -6688,7 +6695,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  scanPackageTracedLI(file, parseFlags | PackageParser.PARSE_MUST_BE_APK,
                          scanFlags, currentTime, null);
              } catch (PackageManagerException e) {
@@ -1666,7 +1815,7 @@ index b6a9940..6eaa248 100644
  
                  // Delete invalid userdata apps
                  if ((parseFlags & PackageParser.PARSE_IS_SYSTEM) == 0 &&
-@@ -9284,30 +9290,31 @@ public class PackageManagerService extends IPackageManager.Stub {
+@@ -9284,30 +9291,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                  adjustedAbi =  scannedPackage.applicationInfo.primaryCpuAbi;
              }
  
@@ -1913,7 +2062,7 @@ index e3b6ecc..9bedfa4 100644
  
      private void enforceCanManageDeviceAdmin() {
 diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
-index 653c5e9..5f2ac57 100644
+index 653c5e9..cb60b69 100644
 --- services/java/com/android/server/SystemServer.java
 +++ services/java/com/android/server/SystemServer.java
 @@ -230,111 +230,105 @@ public final class SystemServer {
@@ -2473,7 +2622,7 @@ index 653c5e9..5f2ac57 100644
  
          try {
              wm.displayReady();
-@@ -712,44 +678,33 @@ public final class SystemServer {
+@@ -712,47 +678,36 @@ public final class SystemServer {
              reportWtf("making display ready", e);
          }
  
@@ -2533,8 +2682,21 @@ index 653c5e9..5f2ac57 100644
 -        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
  
          if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-             if (!disableNonCoreServices) {
-@@ -797,40 +752,37 @@ public final class SystemServer {
+-            if (!disableNonCoreServices) {
++            //if (!disableNonCoreServices) {
+                 traceBeginAndSlog("StartLockSettingsService");
+                 try {
+                     mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
+@@ -772,7 +727,7 @@ public final class SystemServer {
+                 // Always start the Device Policy Manager, so that the API is compatible with
+                 // API8.
+                 mSystemServiceManager.startService(DevicePolicyManagerService.Lifecycle.class);
+-            }
++            //}
+ 
+             if (!disableSystemUI) {
+                 traceBeginAndSlog("StartStatusBarManagerService");
+@@ -797,40 +752,38 @@ public final class SystemServer {
              }
  
              if (!disableNetwork) {
@@ -2557,6 +2719,7 @@ index 653c5e9..5f2ac57 100644
 +            //     mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
 +            // }
 +            //
++			mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
              if (!disableNetwork) {
 -                traceBeginAndSlog("StartNetworkScoreService");
 +                Slog.i(TAG, "StartNetworkScoreService");
@@ -2583,7 +2746,7 @@ index 653c5e9..5f2ac57 100644
                  try {
                      networkPolicy = new NetworkPolicyManagerService(context,
                              mActivityManagerService, networkStats, networkManagement);
-@@ -838,13 +790,12 @@ public final class SystemServer {
+@@ -838,13 +791,12 @@ public final class SystemServer {
                  } catch (Throwable e) {
                      reportWtf("starting NetworkPolicy Service", e);
                  }
@@ -2602,7 +2765,7 @@ index 653c5e9..5f2ac57 100644
                  mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
                  mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
                  mSystemServiceManager.startService(
-@@ -854,12 +805,12 @@ public final class SystemServer {
+@@ -854,12 +806,12 @@ public final class SystemServer {
                      mSystemServiceManager.startService("com.android.server.wifi.RttService");
                  }
  
@@ -2620,7 +2783,7 @@ index 653c5e9..5f2ac57 100644
                  try {
                      connectivity = new ConnectivityService(
                              context, networkManagement, networkStats, networkPolicy);
-@@ -869,17 +820,16 @@ public final class SystemServer {
+@@ -869,17 +821,16 @@ public final class SystemServer {
                  } catch (Throwable e) {
                      reportWtf("starting Connectivity Service", e);
                  }
@@ -2647,7 +2810,7 @@ index 653c5e9..5f2ac57 100644
              }
  
              if (!disableNonCoreServices) {
-@@ -903,52 +853,47 @@ public final class SystemServer {
+@@ -903,52 +854,47 @@ public final class SystemServer {
               * first before continuing.
               */
              if (mountService != null && !mOnlyCore) {
@@ -2720,7 +2883,7 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableNonCoreServices && context.getResources().getBoolean(
                          R.bool.config_enableWallpaperService)) {
-@@ -957,9 +902,8 @@ public final class SystemServer {
+@@ -957,9 +903,8 @@ public final class SystemServer {
                  Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
              }
  
@@ -2731,7 +2894,7 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableNonCoreServices) {
                  mSystemServiceManager.startService(DockObserver.class);
-@@ -969,7 +913,7 @@ public final class SystemServer {
+@@ -969,7 +914,7 @@ public final class SystemServer {
                  }
              }
  
@@ -2740,7 +2903,7 @@ index 653c5e9..5f2ac57 100644
              try {
                  // Listen for wired headset changes
                  inputManager.setWiredAccessoryCallbacks(
-@@ -977,7 +921,6 @@ public final class SystemServer {
+@@ -977,7 +922,6 @@ public final class SystemServer {
              } catch (Throwable e) {
                  reportWtf("starting WiredAccessoryManager", e);
              }
@@ -2748,7 +2911,7 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableNonCoreServices) {
                  if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MIDI)) {
-@@ -1018,11 +961,11 @@ public final class SystemServer {
+@@ -1018,11 +962,11 @@ public final class SystemServer {
                  Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
              }
  
@@ -2765,7 +2928,7 @@ index 653c5e9..5f2ac57 100644
  
              mSystemServiceManager.startService(JobSchedulerService.class);
  
-@@ -1050,13 +993,13 @@ public final class SystemServer {
+@@ -1050,13 +994,13 @@ public final class SystemServer {
                  mSystemServiceManager.startService(ContextHubSystemService.class);
              }
  
@@ -2786,7 +2949,7 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableSamplingProfiler) {
                  traceBeginAndSlog("StartSamplingProfilerService");
-@@ -1074,34 +1017,33 @@ public final class SystemServer {
+@@ -1074,34 +1018,33 @@ public final class SystemServer {
              }
  
              if (!disableNetwork && !disableNetworkTime) {
@@ -2840,7 +3003,7 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableNetwork && !disableNonCoreServices && EmergencyAffordanceManager.ENABLED) {
                  // EmergencyMode sevice
-@@ -1129,29 +1071,29 @@ public final class SystemServer {
+@@ -1129,29 +1072,29 @@ public final class SystemServer {
                          new GraphicsStatsService(context));
              }
  
@@ -2889,7 +3052,15 @@ index 653c5e9..5f2ac57 100644
  
              if (!disableNonCoreServices) {
                  traceBeginAndSlog("StartMediaRouterService");
-@@ -1189,48 +1131,48 @@ public final class SystemServer {
+@@ -1179,6 +1122,7 @@ public final class SystemServer {
+                 }
+                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+             }
++			mSystemServiceManager.startService(TrustManagerService.class);
+             // LauncherAppsService uses ShortcutService.
+             mSystemServiceManager.startService(ShortcutService.Lifecycle.class);
+ 
+@@ -1189,48 +1133,48 @@ public final class SystemServer {
              mSystemServiceManager.startService(MediaProjectionManagerService.class);
          }
  
@@ -2969,7 +3140,7 @@ index 653c5e9..5f2ac57 100644
          if (lockSettings != null) {
              try {
                  lockSettings.systemReady();
-@@ -1238,24 +1180,21 @@ public final class SystemServer {
+@@ -1238,24 +1182,21 @@ public final class SystemServer {
                  reportWtf("making Lock Settings Service ready", e);
              }
          }
@@ -2997,7 +3168,7 @@ index 653c5e9..5f2ac57 100644
  
          // Update the configuration for this context by hand, because we're going
          // to start using it before the config change done in wm.systemReady() will
-@@ -1272,32 +1211,25 @@ public final class SystemServer {
+@@ -1272,32 +1213,25 @@ public final class SystemServer {
              systemTheme.rebase();
          }
  
@@ -3030,7 +3201,7 @@ index 653c5e9..5f2ac57 100644
  
          // These are needed to propagate to the runnable below.
          final NetworkManagementService networkManagementF = networkManagement;
-@@ -1305,8 +1237,8 @@ public final class SystemServer {
+@@ -1305,8 +1239,8 @@ public final class SystemServer {
          final NetworkPolicyManagerService networkPolicyF = networkPolicy;
          final ConnectivityService connectivityF = connectivity;
          final NetworkScoreService networkScoreF = networkScore;
@@ -3041,7 +3212,7 @@ index 653c5e9..5f2ac57 100644
          final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
          final CommonTimeManagementService commonTimeMgmtServiceF = commonTimeMgmtService;
          final AssetAtlasService atlasF = atlas;
-@@ -1314,6 +1246,7 @@ public final class SystemServer {
+@@ -1314,6 +1248,7 @@ public final class SystemServer {
          final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
          final MediaRouterService mediaRouterF = mediaRouter;
          final MmsServiceBroker mmsServiceF = mmsService;
@@ -3049,7 +3220,7 @@ index 653c5e9..5f2ac57 100644
  
          // We now tell the activity manager it is okay to run third party
          // code.  It will call back into us once it has gotten to the state
-@@ -1326,75 +1259,147 @@ public final class SystemServer {
+@@ -1326,75 +1261,147 @@ public final class SystemServer {
                  Slog.i(TAG, "Making services ready");
                  mSystemServiceManager.startBootPhase(
                          SystemService.PHASE_ACTIVITY_MANAGER_READY);
@@ -3222,7 +3393,7 @@ index 653c5e9..5f2ac57 100644
                  try {
                      if (locationF != null) locationF.systemRunning();
                  } catch (Throwable e) {
-@@ -1450,9 +1455,8 @@ public final class SystemServer {
+@@ -1450,9 +1457,8 @@ public final class SystemServer {
                  } catch (Throwable e) {
                      reportWtf("Notifying NetworkScoreService running", e);
                  }
