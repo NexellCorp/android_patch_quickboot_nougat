@@ -3046,15 +3046,19 @@ index 653c5e9..15256cc 100644
  
              if (!disableNonCoreServices) {
                  traceBeginAndSlog("StartMediaRouterService");
-@@ -1179,6 +1122,7 @@ public final class SystemServer {
+@@ -1179,6 +1122,11 @@ public final class SystemServer {
                  }
                  Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
              }
++
++			mediaRouter = new MediaRouterService(context);
++			ServiceManager.addService(Context.MEDIA_ROUTER_SERVICE, mediaRouter);
++
 +			mSystemServiceManager.startService(TrustManagerService.class);
              // LauncherAppsService uses ShortcutService.
              mSystemServiceManager.startService(ShortcutService.Lifecycle.class);
  
-@@ -1189,48 +1133,48 @@ public final class SystemServer {
+@@ -1189,48 +1137,48 @@ public final class SystemServer {
              mSystemServiceManager.startService(MediaProjectionManagerService.class);
          }
  
@@ -3134,7 +3138,7 @@ index 653c5e9..15256cc 100644
          if (lockSettings != null) {
              try {
                  lockSettings.systemReady();
-@@ -1238,24 +1182,21 @@ public final class SystemServer {
+@@ -1238,24 +1186,21 @@ public final class SystemServer {
                  reportWtf("making Lock Settings Service ready", e);
              }
          }
@@ -3162,7 +3166,7 @@ index 653c5e9..15256cc 100644
  
          // Update the configuration for this context by hand, because we're going
          // to start using it before the config change done in wm.systemReady() will
-@@ -1272,32 +1213,25 @@ public final class SystemServer {
+@@ -1272,32 +1217,25 @@ public final class SystemServer {
              systemTheme.rebase();
          }
  
@@ -3214,7 +3218,7 @@ index 653c5e9..15256cc 100644
  
          // We now tell the activity manager it is okay to run third party
          // code.  It will call back into us once it has gotten to the state
-@@ -1326,75 +1261,147 @@ public final class SystemServer {
+@@ -1326,75 +1265,147 @@ public final class SystemServer {
                  Slog.i(TAG, "Making services ready");
                  mSystemServiceManager.startBootPhase(
                          SystemService.PHASE_ACTIVITY_MANAGER_READY);
