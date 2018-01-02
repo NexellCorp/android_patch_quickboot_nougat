@@ -1,0 +1,22 @@
+diff --git audio_route.c audio_route.c
+index 60f11bb..7042992 100644
+--- audio_route.c
++++ audio_route.c
+@@ -662,8 +662,15 @@ struct audio_route *audio_route_init(unsigned int card, const char *xml_path)
+ 
+     ar->mixer = mixer_open(card);
+     if (!ar->mixer) {
+-        ALOGE("Unable to open the mixer, aborting.");
+-        goto err_mixer_open;
++        while (1) {
++          ar->mixer = mixer_open(card);
++          if (!ar->mixer) {
++            ALOGE("Wait mixer...");
++            usleep(1000);
++          }
++          else
++            break;
++        }
+     }
+ 
+     ar->mixer_path = NULL;
