@@ -2062,7 +2062,7 @@ index e3b6ecc..9bedfa4 100644
  
      private void enforceCanManageDeviceAdmin() {
 diff --git services/java/com/android/server/SystemServer.java services/java/com/android/server/SystemServer.java
-index 653c5e9..cb60b69 100644
+index 653c5e9..15256cc 100644
 --- services/java/com/android/server/SystemServer.java
 +++ services/java/com/android/server/SystemServer.java
 @@ -230,111 +230,105 @@ public final class SystemServer {
@@ -2830,42 +2830,27 @@ index 653c5e9..cb60b69 100644
  
              mSystemServiceManager.startService(DeviceStorageMonitorService.class);
  
--            if (!disableLocation) {
+             if (!disableLocation) {
 -                traceBeginAndSlog("StartLocationManagerService");
--                try {
--                    location = new LocationManagerService(context);
--                    ServiceManager.addService(Context.LOCATION_SERVICE, location);
--                } catch (Throwable e) {
--                    reportWtf("starting Location Manager", e);
--                }
++                Slog.i(TAG, "StartLocationManagerService");
+                 try {
+                     location = new LocationManagerService(context);
+                     ServiceManager.addService(Context.LOCATION_SERVICE, location);
+                 } catch (Throwable e) {
+                     reportWtf("starting Location Manager", e);
+                 }
 -                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
--
+ 
 -                traceBeginAndSlog("StartCountryDetectorService");
--                try {
--                    countryDetector = new CountryDetectorService(context);
--                    ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
--                } catch (Throwable e) {
--                    reportWtf("starting Country Detector", e);
--                }
++                Slog.i(TAG, "StartCountryDetectorService");
+                 try {
+                     countryDetector = new CountryDetectorService(context);
+                     ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
+                 } catch (Throwable e) {
+                     reportWtf("starting Country Detector", e);
+                 }
 -                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
--            }
-+            // if (!disableLocation) {
-+            //     Slog.i(TAG, "StartLocationManagerService");
-+            //     try {
-+            //         location = new LocationManagerService(context);
-+            //         ServiceManager.addService(Context.LOCATION_SERVICE, location);
-+            //     } catch (Throwable e) {
-+            //         reportWtf("starting Location Manager", e);
-+            //     }
-+            //
-+            //     Slog.i(TAG, "StartCountryDetectorService");
-+            //     try {
-+            //         countryDetector = new CountryDetectorService(context);
-+            //         ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetector);
-+            //     } catch (Throwable e) {
-+            //         reportWtf("starting Country Detector", e);
-+            //     }
-+            // }
+             }
  
              if (!disableNonCoreServices && !disableSearchManager) {
 -                traceBeginAndSlog("StartSearchManagerService");
@@ -3262,8 +3247,8 @@ index 653c5e9..cb60b69 100644
 +				// NetworkPolicyManagerService networkPolicyF = null;
 +				// ConnectivityService connectivityF = null;
 +				// NetworkScoreService networkScoreF = null;
-+				LocationManagerService locationF = null;
-+				CountryDetectorService countryDetectorF = null;
++				// LocationManagerService locationF = null;
++				// CountryDetectorService countryDetectorF = null;
 +				// NetworkTimeUpdateService networkTimeUpdaterF = null;
 +
 +				// Slog.i(TAG, "StartNetworkManagementService");
@@ -3322,21 +3307,21 @@ index 653c5e9..cb60b69 100644
 +				// Slog.i(TAG, "IpConnectivityMetrics");
 +				// mSystemServiceManager.startService(IpConnectivityMetrics.class);
 +
-+				Slog.i(TAG, "StartLocationManagerService");
-+				try {
-+					locationF = new LocationManagerService(context);
-+					ServiceManager.addService(Context.LOCATION_SERVICE, locationF);
-+				} catch (Throwable e) {
-+					reportWtf("starting Location Manager", e);
-+				}
-+
-+				Slog.i(TAG, "StartCountryDetectorService");
-+				try {
-+					countryDetectorF = new CountryDetectorService(context);
-+					ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetectorF);
-+				} catch (Throwable e) {
-+					reportWtf("starting Country Detector", e);
-+				}
++				// Slog.i(TAG, "StartLocationManagerService");
++				// try {
++				// 	locationF = new LocationManagerService(context);
++				// 	ServiceManager.addService(Context.LOCATION_SERVICE, locationF);
++				// } catch (Throwable e) {
++				// 	reportWtf("starting Location Manager", e);
++				// }
++                                //
++				// Slog.i(TAG, "StartCountryDetectorService");
++				// try {
++				// 	countryDetectorF = new CountryDetectorService(context);
++				// 	ServiceManager.addService(Context.COUNTRY_DETECTOR, countryDetectorF);
++				// } catch (Throwable e) {
++				// 	reportWtf("starting Country Detector", e);
++				// }
 +
 +				// Slog.i(TAG, "StartNetworkTimeUpdateService");
 +				// try {
