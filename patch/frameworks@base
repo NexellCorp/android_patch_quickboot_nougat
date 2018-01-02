@@ -507,6 +507,27 @@ index 627f360..9f847e5 100644
  
      <!-- These are the standard packages that are white-listed to always have internet
           access while in power save mode, even if they aren't in the foreground. -->
+diff --git packages/ExtServices/src/android/ext/services/notification/Ranker.java packages/ExtServices/src/android/ext/services/notification/Ranker.java
+index 2ce667c..da344bd 100644
+--- packages/ExtServices/src/android/ext/services/notification/Ranker.java
++++ packages/ExtServices/src/android/ext/services/notification/Ranker.java
+@@ -154,11 +154,11 @@ public final class Ranker extends NotificationRankerService {
+ 
+     @Override
+     public void onListenerConnected() {
+-        if (DEBUG) Log.i(TAG, "CONNECTED");
+-        mUnbundledNotifications = new HashMap<>();
+-        for (StatusBarNotification sbn : getActiveNotifications()) {
+-            onNotificationPosted(sbn);
+-        }
++        // if (DEBUG) Log.i(TAG, "CONNECTED");
++        // mUnbundledNotifications = new HashMap<>();
++        // for (StatusBarNotification sbn : getActiveNotifications()) {
++        //     onNotificationPosted(sbn);
++        // }
+     }
+ 
+     private void adjustAutobundlingSummary(String packageName, String key, boolean summaryNeeded,
 diff --git packages/SystemUI/proguard.flags packages/SystemUI/proguard.flags
 index d0c2d29..cae67cd 100644
 --- packages/SystemUI/proguard.flags
