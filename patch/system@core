@@ -56,6 +56,39 @@ index ca8bea2..42f8feb 100644
      # Log all boot events.
 -    exec - root root -- /system/bin/bootstat -l
 +#    exec - root root -- /system/bin/bootstat -l
+diff --git fs_mgr/fs_mgr.c fs_mgr/fs_mgr.c
+index 387f708..bbb7a4e 100644
+--- fs_mgr/fs_mgr.c
++++ fs_mgr/fs_mgr.c
+@@ -106,6 +106,17 @@ static void check_fs(char *blk_device, char *fs_type, char *target)
+         blk_device
+     };
+ 
++	/* worked by ZW RIO */
++	char *mask_file = "/cache/recovery/factory_mask";
++
++	if (access(mask_file,F_OK) == -1) {
++		INFO("normal boot,do not check fs\n");
++		return;
++	} else {
++		INFO("Find factory mask file,checking fs now...\n");
++	}
++	/* end ZW RIO */
++
+     /* Check for the types of filesystems we know how to check */
+     if (!strcmp(fs_type, "ext2") || !strcmp(fs_type, "ext3") || !strcmp(fs_type, "ext4")) {
+         /*
+@@ -180,6 +191,10 @@ static void check_fs(char *blk_device, char *fs_type, char *target)
+         }
+     }
+ 
++    /* worked by ZW RIO */
++    remove(mask_file);
++	/* end ZW RIO */
++
+     return;
+ }
+ 
 diff --git init/init.cpp init/init.cpp
 index cd2d2e6..11755a4 100644
 --- init/init.cpp
