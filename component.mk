@@ -315,7 +315,7 @@ PRODUCT_PACKAGES += \
 # PRODUCT_PACKAGES += \
     Provision \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     SystemUI \
 
 # PRODUCT_PACKAGES += \
