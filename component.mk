@@ -315,7 +315,7 @@ PRODUCT_PACKAGES += \
 # PRODUCT_PACKAGES += \
     Provision \
 
-PRODUCT_PACKAGES += \
+# PRODUCT_PACKAGES += \
     SystemUI \
 
 # PRODUCT_PACKAGES += \
@@ -1080,7 +1080,8 @@ PRODUCT_BOOT_JARS := \
     voip-common \
     ims-common \
     apache-xml \
-    org.apache.http.legacy.boot
+    org.apache.http.legacy.boot \
+    com.android.location.provider
 
 # The order of PRODUCT_SYSTEM_SERVER_JARS matters.
 PRODUCT_SYSTEM_SERVER_JARS := \
